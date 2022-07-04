@@ -28,3 +28,8 @@ fp-info-cache
 
 # Zips for JLC
 *.zip
+
+# Exported gbr and drill files
+*.gbr
+*.gbrjob
+*.drl
