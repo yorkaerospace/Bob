@@ -70,7 +70,7 @@ uint32_t bmpGetPres(bmp_t *bmp) {
 	uint32_t B7;
 	int32_t p, X1, X2 = 0;
 	
-	B7 = ((uint32_t)UP - bmp->B3)*(50000);
+	B7 = ((uint32_t)UP - bmp->B3)*(50000);					// I wonder if the C compiler can optimise this mess
 	if(B7 < 0x80000000) {
 		p = (B7 * 2) / bmp->B4;
 	} else {
