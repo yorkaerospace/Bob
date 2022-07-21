@@ -1,0 +1,30 @@
+# Bob Rev 1 (Not built)
+ - JLC PCB accepts revisions if you contact customer support *quickly*.
+ - Ensure breakout pins are aligned to a 0.1" grid.
+ - Ensure USB traces are correctly sized to get the correct impedance.
+ 	- This involves a lot of maths. Use [a calculator.](https://www.pcbway.com/pcb_prototype/impedance_calculator.html)
+# Bob Rev 2
+ - Screw switch has large thermal mass, so it needs to be soldered first.
+ 	 - It is also large, so the nut should be located *far* away from other components so you can actually solder them.
+ 	 - Eggtimer uses a brass nut, but I was able to get it to work with random M3s I found lying around.
+ 		 - Chromed or galved nuts *don't* work.
+ 	 - Needs to have some form of shake-prevention, e.g. nylock or shakeproof washer.
+ 	 - JLC fills hole with copper, which needs to be filed out.
+ 	 - M2 is probably more reasonable. 
+ 	 - Aside from this, seems to work well as a detail.
+ - 0603's are the absolute smallest that can be soldered with "normal" soldering supplies.
+ 	 - 0806 is probably more reasonable.
+ 	 - 0402 is *pain*.
+ - Hot air and flux make everything *so much* easier.
+ 	 - Fluid tension pulls components into alignment in a *very* satisfying way.
+ 	 - Flux doesn't hold QFNs that well, but heating the board and dropping the package on seems to work.
+ 	 - Leaving flux on the board too long can tarnish the pads. 
+ 	 	 - May affect reliability.
+ 	 	 - Is ugly as sin.
+ 	 	 - Pads can still be tinned, but the easiest solution is to *not let it happen*.
+ 	 	 - Clean board with IPA and and old toothbrush.
+ 	 - 0402s have a nasty tendency to tombstone.
+ - 5032 crystals are hard to find. 
+ - Placing tight arrays of components is difficult.
+ - JLC have an assembly option.
+ 
