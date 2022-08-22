@@ -1,4 +1,5 @@
 (sym_lib_table
   (lib (name "MCU_RaspberryPi_RP2040")(type "Legacy")(uri "${KIPRJMOD}/MCU_RaspberryPi_RP2040.lib")(options "")(descr ""))
   (lib (name "YAR_Sensors")(type "KiCad")(uri "${KIPRJMOD}/YAR-Kicad-Libs/Components/YAR_Sensors.kicad_sym")(options "")(descr ""))
+  (lib (name "YAR_MCU")(type "KiCad")(uri "${KIPRJMOD}/YAR-Kicad-Libs/Components/YAR_MCU.kicad_sym")(options "")(descr ""))
 )
