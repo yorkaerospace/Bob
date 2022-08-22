@@ -27,4 +27,10 @@
  - 5032 crystals are hard to find. 
  - Placing tight arrays of components is difficult.
  - JLC have an assembly option.
- 
+# Bob Rev 3
+ - LED does not need to be nearly that bright. Use a 220R current limiter.
+ - Buy the *right* size of component, you moron.
+ - 0.5 mm text is too small, 0.75-1 is probably more reasonable
+ - Thermal relief will make soldering things to GND so much easier.
+ - Buzzer is not very loud, maybe run it off VBAT?
+ - Its perfectly safe to use a button on BOOTSEL. 
