@@ -3350,7 +3350,7 @@
   (symbol (lib_id "power:+3.3V") (at 247.65 27.94 0) (unit 1)
     (in_bom yes) (on_board yes) (fields_autoplaced)
     (uuid 22a21ef5-8d73-45f5-8c64-6674e766031d)
-    (property "Reference" "#PWR?" (id 0) (at 247.65 31.75 0)
+    (property "Reference" "#PWR0106" (id 0) (at 247.65 31.75 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+3.3V" (id 1) (at 247.65 22.86 0))
@@ -3610,7 +3610,7 @@
   (symbol (lib_id "power:GND") (at 261.62 40.64 90) (unit 1)
     (in_bom yes) (on_board yes) (fields_autoplaced)
     (uuid 3868f898-270d-4a4f-a12d-011ac69fd79d)
-    (property "Reference" "#PWR?" (id 0) (at 267.97 40.64 0)
+    (property "Reference" "#PWR0149" (id 0) (at 267.97 40.64 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "" (id 1) (at 265.43 40.6399 90)
@@ -4221,7 +4221,7 @@
   (symbol (lib_id "power:+3.3V") (at 233.68 35.56 90) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 8ff25ca3-7a6f-4ba9-9951-03e37d1c76eb)
-    (property "Reference" "#PWR?" (id 0) (at 237.49 35.56 0)
+    (property "Reference" "#PWR0129" (id 0) (at 237.49 35.56 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+3.3V" (id 1) (at 224.79 35.56 90)
@@ -4323,7 +4323,7 @@
   (symbol (lib_id "power:GND") (at 247.65 58.42 0) (unit 1)
     (in_bom yes) (on_board yes) (fields_autoplaced)
     (uuid 98a83e37-2266-4070-aae2-b4e3c95041c0)
-    (property "Reference" "#PWR?" (id 0) (at 247.65 64.77 0)
+    (property "Reference" "#PWR0130" (id 0) (at 247.65 64.77 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (id 1) (at 247.65 63.5 0))
@@ -4367,7 +4367,7 @@
     (property "Reference" "R8" (id 0) (at 184.15 124.4599 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Value" "100" (id 1) (at 184.15 126.9999 0)
+    (property "Value" "" (id 1) (at 184.15 126.9999 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Footprint" "Resistor_SMD:R_0603_1608Metric" (id 2) (at 179.832 125.73 90)
@@ -4480,7 +4480,7 @@
   (symbol (lib_id "power:GND") (at 233.68 43.18 270) (unit 1)
     (in_bom yes) (on_board yes) (fields_autoplaced)
     (uuid adbdbf00-e19f-45aa-8793-9f170a1fa9e8)
-    (property "Reference" "#PWR?" (id 0) (at 227.33 43.18 0)
+    (property "Reference" "#PWR0107" (id 0) (at 227.33 43.18 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "" (id 1) (at 229.87 43.1799 90)
@@ -4696,10 +4696,10 @@
     (property "Reference" "JP1" (id 0) (at 132.08 39.37 90)
       (effects (font (size 1.27 1.27)) (justify right))
     )
-    (property "Value" "BOOTSEL" (id 1) (at 127 41.91 90)
+    (property "Value" "" (id 1) (at 127 41.91 90)
       (effects (font (size 1.27 1.27)) (justify right))
     )
-    (property "Footprint" "Jumper:SolderJumper-2_P1.3mm_Open_RoundedPad1.0x1.5mm" (id 2) (at 137.16 40.64 0)
+    (property "Footprint" "" (id 2) (at 137.16 40.64 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "~" (id 3) (at 137.16 40.64 0)
@@ -5123,7 +5123,7 @@
   (symbol (lib_id "power:GND") (at 261.62 43.18 90) (unit 1)
     (in_bom yes) (on_board yes) (fields_autoplaced)
     (uuid f9ad9c73-d652-47d9-bade-657d8c1e1da7)
-    (property "Reference" "#PWR?" (id 0) (at 267.97 43.18 0)
+    (property "Reference" "#PWR0131" (id 0) (at 267.97 43.18 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "" (id 1) (at 265.43 43.1799 90)
@@ -5238,6 +5238,12 @@
     (path "/4ee8bd35-3c24-4e7c-aa51-6226acd4dd2f"
       (reference "#PWR0105") (unit 1) (value "GND") (footprint "")
     )
+    (path "/22a21ef5-8d73-45f5-8c64-6674e766031d"
+      (reference "#PWR0106") (unit 1) (value "+3.3V") (footprint "")
+    )
+    (path "/adbdbf00-e19f-45aa-8793-9f170a1fa9e8"
+      (reference "#PWR0107") (unit 1) (value "GND") (footprint "")
+    )
     (path "/0029820e-80b7-4df3-ad7f-de6b7dce0bb1"
       (reference "#PWR0108") (unit 1) (value "GND") (footprint "")
     )
@@ -5301,6 +5307,15 @@
     (path "/90755c3e-e07b-431f-8d80-6ac60b1be335"
       (reference "#PWR0128") (unit 1) (value "+3.3V") (footprint "")
     )
+    (path "/8ff25ca3-7a6f-4ba9-9951-03e37d1c76eb"
+      (reference "#PWR0129") (unit 1) (value "+3.3V") (footprint "")
+    )
+    (path "/98a83e37-2266-4070-aae2-b4e3c95041c0"
+      (reference "#PWR0130") (unit 1) (value "GND") (footprint "")
+    )
+    (path "/f9ad9c73-d652-47d9-bade-657d8c1e1da7"
+      (reference "#PWR0131") (unit 1) (value "GND") (footprint "")
+    )
     (path "/81abba7b-65ef-4439-960f-9f1a27841048"
       (reference "#PWR0132") (unit 1) (value "GND") (footprint "")
     )
@@ -5352,23 +5367,8 @@
     (path "/5c30e2eb-8d2e-4f39-a788-95f102939d02"
       (reference "#PWR0148") (unit 1) (value "GND") (footprint "")
     )
-    (path "/22a21ef5-8d73-45f5-8c64-6674e766031d"
-      (reference "#PWR?") (unit 1) (value "+3.3V") (footprint "")
-    )
     (path "/3868f898-270d-4a4f-a12d-011ac69fd79d"
-      (reference "#PWR?") (unit 1) (value "GND") (footprint "")
-    )
-    (path "/8ff25ca3-7a6f-4ba9-9951-03e37d1c76eb"
-      (reference "#PWR?") (unit 1) (value "+3.3V") (footprint "")
-    )
-    (path "/98a83e37-2266-4070-aae2-b4e3c95041c0"
-      (reference "#PWR?") (unit 1) (value "GND") (footprint "")
-    )
-    (path "/adbdbf00-e19f-45aa-8793-9f170a1fa9e8"
-      (reference "#PWR?") (unit 1) (value "GND") (footprint "")
-    )
-    (path "/f9ad9c73-d652-47d9-bade-657d8c1e1da7"
-      (reference "#PWR?") (unit 1) (value "GND") (footprint "")
+      (reference "#PWR0149") (unit 1) (value "GND") (footprint "")
     )
     (path "/e65ef186-5520-4142-8b10-d2898e4cdc2f"
       (reference "BZ1") (unit 1) (value "Buzzer") (footprint "Buzzer_Beeper:Buzzer_12x9.5RM7.6")
@@ -5491,7 +5491,7 @@
       (reference "R7") (unit 1) (value "10k") (footprint "Resistor_SMD:R_0603_1608Metric")
     )
     (path "/a20166e6-57cd-43ff-aad3-a0a7bed033c3"
-      (reference "R8") (unit 1) (value "100") (footprint "Resistor_SMD:R_0603_1608Metric")
+      (reference "R8") (unit 1) (value "220") (footprint "Resistor_SMD:R_0603_1608Metric")
     )
     (path "/6192c7bb-0335-4818-a72b-44407a15a4d1"
       (reference "SW1") (unit 1) (value "Screw Switch") (footprint "Connector:Screw_Switch_M2")
