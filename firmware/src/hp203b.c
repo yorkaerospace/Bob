@@ -88,7 +88,7 @@ uint32_t HP203GetPres(hp203_t * sensor) {
     HP203SendCommand(sensor, HP203_READ_P);
     HP203ReadBytes(sensor, buffer, 3);
 
-    return buffer[0] | buffer[1] << 8 | buffer[2] << 16;
+    return buffer[2] | buffer[1] << 8 | buffer[0] << 16;
 }
 
 /* Gets the Temperature. Must be ran after a measurement has finished*/
@@ -98,7 +98,7 @@ uint32_t HP203GetTemp(hp203_t * sensor) {
     HP203SendCommand(sensor, HP203_READ_T);
     HP203ReadBytes(sensor, buffer, 3);
 
-    return buffer[0] | buffer[1] << 8 | buffer[2] << 16;
+    return buffer[2] | buffer[1] << 8 | buffer[0] << 16;
 }
 
 /* Gets pressure and temperature in a single i2c read.
@@ -110,9 +110,8 @@ struct presTemp HP203GetPresTemp(hp203_t * sensor) {
     HP203SendCommand(sensor, HP203_READ_PT);
     HP203ReadBytes(sensor, buffer, 6);
 
-    // TODO: Check that these are the right way round when you arent as tired.
-    output.pres = buffer[0] | buffer[1] << 8 | buffer[2] << 16;
-    output.temp = buffer[3] | buffer[4] << 8 | buffer[5] << 16;
+    output.pres = buffer[5] | buffer[4] << 8 | buffer[3] << 16;
+    output.temp = buffer[2] | buffer[1] << 8 | buffer[0] << 16;
 
     return output;
 }
