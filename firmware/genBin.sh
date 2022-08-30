@@ -17,6 +17,7 @@ git submodule update
 export PICO_SDK_PATH=../lib/pico-sdk
 
 # Clear bin folder and create a new one
+echo "Removing $SCRIPT_DIR/bin..."
 rm -rI bin # I dont trust my bash skills, so you're getting prompted.
 mkdir bin  # Cope.
 
