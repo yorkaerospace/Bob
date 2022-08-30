@@ -1,0 +1,1 @@
+/opt/gcc-arm-none-eabi/bin/arm-none-eabi-gcc -mcpu=cortex-m0plus -mthumb -O3 -DNDEBUG -Wl,--build-id=none CMakeFiles/Bob.dir/main.c.obj -o Bob.elf 
