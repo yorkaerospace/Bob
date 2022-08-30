@@ -22,4 +22,4 @@ mkdir bin  # Cope.
 
 # Make the makefiles
 cd bin
-cmake ../src
+cmake "$@" ../src
