@@ -4,3 +4,6 @@
 [submodule "kicad/YAR-Kicad-Libs"]
 	path = kicad/YAR-Kicad-Libs
 	url = https://github.com/yorkaerospace/YAR-Kicad-Libs.git
+[submodule "firmware/hp203b-rs"]
+	path = firmware/hp203b-rs
+	url = https://github.com/Laura7089/hp203b-rs.git
