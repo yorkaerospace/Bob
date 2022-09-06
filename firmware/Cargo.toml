@@ -16,9 +16,11 @@ panic-probe = { version = "0.3", features = ["print-defmt"] }
 rp2040-hal = { version="0.6", features=["rt"] }
 rp2040-boot2 = "0.2"
 
-once_cell = { version = "1.14.0", default-features = false }
-
 hp203b = "0.1.0-alpha.2"
+shared-bus = "0.2.4"
+fugit = { version = "0.3.6", features = ["defmt"] }
+embedded-hal-compat = { version = "0.7.0", features = ["defmt"] }
+ouroboros = { version = "0.15.4", default-features = false }
 
 [patch.crates-io]
 hp203b = { path = "./hp203b-rs" }
