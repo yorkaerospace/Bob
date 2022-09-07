@@ -11,11 +11,11 @@ set(sources main.c
             hp203b.c
             hp203b.h)
 
-target_link_libraries(pico_stdlib hardware_i2c)
-
 add_executable(Bob
   main.c
 )
+
+target_link_libraries(Bob pico_stdlib hardware_i2c)
 
 pico_enable_stdio_usb(Bob 1)
 
