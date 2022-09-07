@@ -2,7 +2,7 @@
 
 #include "pico/stdlib.h"
 #include "hardware/i2c.h"
-#include "hp203.h"
+#include "hp203b.h"
 
 /* Simple init function for HP203. */
 hp203_t HP203Init(i2c_inst_t * i2c) {
@@ -45,12 +45,12 @@ uint8_t HP203Test(hp203_t * sensor) {
     uint8_t buffer[1];
     int result[3];              // Used to store the result of operations
 
-    result[0] = sendCommandHP203(sensor, HP203_RESET);
+    result[0] = HP203SendCommand(sensor, HP203_RESET);
 
     sleep_ms(10);               // Wait until the sensor is stable.
 
-    result[1] = sendCommandHP203(sensor, HP203_READ_REG | HP203_INT_SRC);
-    result[2] = readbytesHP203(sensor, buffer, 1);
+    result[1] = HP203SendCommand(sensor, HP203_READ_REG | HP203_INT_SRC);
+    result[2] = HP203ReadBytes(sensor, buffer, 1);
 
     // Look over the results and figure out what to return.
 
@@ -78,7 +78,7 @@ uint32_t HP203Measure(hp203_t * sensor) {
         {131100, 65600, 32800, 16400, 8200, 4100, 2100};
 
     uint8_t command = HP203_ADC_SET | sensor->channel | sensor->oversample;
-    sendCommandHP203(sensor, command);
+    HP203SendCommand(sensor, command);
 
     return timeLookup[sensor->oversample >> 3 + sensor->channel >> 1];
 }
