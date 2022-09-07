@@ -33,8 +33,8 @@
 
 typedef struct hp203_t {
     i2c_inst_t * i2c;
-    uint8_t channel = HP203_CHN_PT;
-    uint8_t oversample = HP203_OSR_128;
+    uint8_t channel;
+    uint8_t oversample;
 } hp203_t;
 
 struct presTemp {

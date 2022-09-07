@@ -8,6 +8,8 @@
 hp203_t HP203Init(i2c_inst_t * i2c) {
     hp203_t sensor;
     sensor.i2c = i2c;
+    sensor.channel = HP203_CHN_PT;
+    sensor.oversample = HP203_OSR_128;
     return sensor;
 }
 
