@@ -13,6 +13,7 @@ set(sources main.c
 
 add_executable(Bob
   main.c
+  hp203b.c
 )
 
 target_link_libraries(Bob pico_stdlib hardware_i2c)
