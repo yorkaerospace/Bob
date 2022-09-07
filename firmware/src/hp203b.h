@@ -70,5 +70,5 @@ uint32_t HP203GetTemp(hp203_t * sensor);
 
 /* Gets pressure and temperature in a single i2c read.
  * Returns a struct containing both. */
-struct presTemp HP203GetPresTemp(hp203_t * sensor)
+struct presTemp HP203GetPresTemp(hp203_t * sensor);
 #endif
