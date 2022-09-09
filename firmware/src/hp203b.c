@@ -84,7 +84,7 @@ uint32_t HP203Measure(hp203_t * sensor) {
 
     HP203SendCommand(sensor, command);
 
-    return timeLookup[sensor->oversample >> 3 + sensor->channel >> 1];
+    return timeLookup[sensor->oversample + sensor->channel >> 1];
 }
 
 /* Gets the pressure. Must be ran after a measurement has finished*/
