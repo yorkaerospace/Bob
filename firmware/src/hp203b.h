@@ -1,3 +1,13 @@
+/* Simple, and probably bad, driver for the HP203B chip from HopeRF.
+ * A correctly-configured HP203 struct can be created using the
+ * HP203Init function. The chip can then be configured by setting the
+ * channel and oversample values in that struct.
+ *
+ * To read values off the chip start a measurement using HP203Measure
+ * then read the values off the chip using one of the HP203Get...
+ * functions. Values are returned in pascals and centidegrees, because
+ * floating point maths is the devil. */
+
 #ifndef HP203_H
 #define HP203_H
 
