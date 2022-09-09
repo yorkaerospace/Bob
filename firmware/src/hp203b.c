@@ -8,8 +8,8 @@
 hp203_t HP203Init(i2c_inst_t * i2c) {
     hp203_t sensor;
     sensor.i2c = i2c;
-    sensor.channel = HP203_CHN_PT;
-    sensor.oversample = HP203_OSR_128;
+    sensor.channel = PRES_TEMP;
+    sensor.oversample = OSR_128;
     return sensor;
 }
 
@@ -72,12 +72,16 @@ uint8_t HP203Test(hp203_t * sensor) {
 }
 
 /* Tells the HP203 to start measuring data.
- * Returns the expected measurement duration in us. */
+ * Returns the expected measurement duration in us.
+ * Uses the OSR and CHN values in the HP203 struct */
 uint32_t HP203Measure(hp203_t * sensor) {
     static const uint32_t timeLookup[7] =
         {131100, 65600, 32800, 16400, 8200, 4100, 2100};
 
-    uint8_t command = HP203_ADC_SET | sensor->channel | sensor->oversample;
+    uint8_t command = HP203_ADC_SET
+                    | sensor->oversample >> HP203_OSR_SHIFT
+                    | sensor->channel;
+
     HP203SendCommand(sensor, command);
 
     return timeLookup[sensor->oversample >> 3 + sensor->channel >> 1];

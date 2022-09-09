@@ -4,7 +4,7 @@
 #include "hardware/i2c.h"
 
 #define HP203_ADDR 	0x76
-#define HP203_TIMEOUT	100
+#define HP203_TIMEOUT	1000
 
 // HP203 Commands
 #define HP203_RESET	0x06
@@ -21,20 +21,28 @@
 #define HP203_INT_SRC	0x0D
 
 // HP203 ADC_CVT settings
-#define HP203_CHN_PT	0x00
-#define HP203_CHN_T	0x02
+#define HP203_OSR_SHIFT 3
 
-#define HP203_OSR_4096	0x00
-#define HP203_OSR_2048	0x08
-#define HP203_OSR_1024	0x10
-#define HP203_OSR_512	0x18
-#define HP203_OSR_256	0x20
-#define HP203_OSR_128	0x28
+// Enum containing the settings for the channel
+enum HP203_CHN {
+    PRES_TEMP = 0x00,
+    TEMP_ONLY = 0x01
+};
+
+// Enum containing the various settings for the oversample rate
+enum HP203_OSR {
+    OSR_4096 = 0x00,
+    OSR_2028 = 0x01,
+    OSR_1024 = 0x02,
+    OSR_512  = 0x03,
+    OSR_256  = 0x04,
+    OSR_128  = 0x05
+};
 
 typedef struct hp203_t {
     i2c_inst_t * i2c;
-    uint8_t channel;
-    uint8_t oversample;
+    enum HP203_CHN channel;
+    enum HP203_OSR oversample;
 } hp203_t;
 
 struct presTemp {
