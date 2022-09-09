@@ -10,11 +10,14 @@ pico_sdk_init()
 set(sources main.c
             bob.h
             hp203b.c
-            hp203b.h)
+            hp203b.h
+            usbcmd.c
+            usbcmd.h)
 
 add_executable(Bob
   main.c
   hp203b.c
+  usbcmd.c
 )
 
 target_link_libraries(Bob pico_stdlib hardware_i2c)
