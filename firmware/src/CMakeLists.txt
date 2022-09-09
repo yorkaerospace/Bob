@@ -8,6 +8,7 @@ set(CMAKE_CXX_STANDARD 17)
 pico_sdk_init()
 
 set(sources main.c
+            bob.h
             hp203b.c
             hp203b.h)
 
