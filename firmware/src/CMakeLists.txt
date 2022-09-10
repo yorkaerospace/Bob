@@ -11,12 +11,15 @@ set(sources main.c
             bob.h
             hp203b.c
             hp203b.h
+            qmc5883l.c
+            qmc5883l.h
             usbcmd.c
             usbcmd.h)
 
 add_executable(Bob
   main.c
   hp203b.c
+  qmc5883l.c
   usbcmd.c
 )
 
