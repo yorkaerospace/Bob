@@ -4,6 +4,8 @@
 #include "pico/stdlib.h"
 #include "pico/bootrom.h"
 
+// TODO: Review this when I'm less tired and make sure its not terrible.
+
 static const char helpText[] =
     "Bob Rev 3 running build: %s\n"
     "Press:\n"
