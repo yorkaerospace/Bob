@@ -79,7 +79,7 @@ uint32_t HP203Measure(hp203_t * sensor) {
         {131100, 65600, 32800, 16400, 8200, 4100, 2100};
 
     uint8_t command = HP203_ADC_SET
-                    | sensor->oversample >> HP203_OSR_SHIFT
+                    | sensor->oversample << HP203_OSR_SHIFT
                     | sensor->channel;
 
     HP203SendCommand(sensor, command);

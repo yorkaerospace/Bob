@@ -31,7 +31,7 @@
 #define HP203_INT_SRC	0x0D
 
 // HP203 ADC_CVT settings
-#define HP203_OSR_SHIFT 3
+#define HP203_OSR_SHIFT 2
 
 // Enum containing the settings for the channel
 enum HP203_CHN {
