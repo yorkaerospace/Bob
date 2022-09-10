@@ -16,4 +16,7 @@
 // Buzzer
 #define BOB_BUZZER 7
 
+// Size of the flash storage in bytes
+#define BOB_STORAGE (64*1024*1024)
+
 #endif
