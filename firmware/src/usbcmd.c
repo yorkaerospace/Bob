@@ -15,7 +15,7 @@ static uint8_t state;
 static repeating_timer_t timer;
 
 /* Polls stdin and interprets what it gets.
- * This is a biiig IRQ... */
+ * Try make sure that functions being called here are short; this is an IRQ */
 static bool usbCmdPoller() {
     if (state != 2) {
         switch(getchar_timeout_us(0)) {
@@ -42,7 +42,7 @@ static bool usbCmdPoller() {
 /* Initialises the USB command handler
  * Returns: 0 on success
  * 1 if USB command handler is already running
- * 2 on other failure */
+ * 2 if the timer could not be created */
 uint8_t usbCmdInit() {
     bool timerSuccess;
     if(state != 1) {
