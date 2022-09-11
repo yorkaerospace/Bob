@@ -112,7 +112,7 @@ uint8_t QMCGetCfg(qmc_t * sensor) {
         sensor->config.mode = buffer[0] & 1;
         sensor->config.scale = (buffer[0] >> QMC_SCALE_SHIFT) & 1;
 
-        if(buffer[0] & 3 > 1 || (buffer[0] >> QMC_SCALE_SHIFT) & 3 > 1) {
+        if(buffer[0] & 0x82) {
             invalid = true;
         }
 
@@ -138,12 +138,10 @@ uint8_t QMCGetMag(qmc_t * sensor, struct magData * data) {
     }
 }
 
-// TODO: Figure out why this breaks everything. Until then do not use.
-
 /* Reads temperature from the magnetometer and stores it in result
  * Returns:
  * 0 if successful.
- * 1 if the i2c read failed.
+ * 1 if the i2c read failed. */
 uint8_t QMCGetTemp(qmc_t * sensor, int16_t * result) {
     uint8_t buffer[2];
     // Why doesnt it increment pointers thats so annoying >:(
@@ -154,4 +152,4 @@ uint8_t QMCGetTemp(qmc_t * sensor, int16_t * result) {
     } else {
         return 1;
     }
-} */
+}
