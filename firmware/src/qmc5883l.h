@@ -139,7 +139,7 @@ uint8_t QMCGetMag(qmc_t * sensor, struct magData * data);
 /* Reads temperature from the magnetometer and stores it in result
  * Returns:
  * 0 if successful.
- * 1 if the i2c read failed. */
-uint8_t QMCGetTemp(qmc_t * sensor, int16_t * result)
+ * 1 if the i2c read failed.
+uint8_t QMCGetTemp(qmc_t * sensor, int16_t * result);
 
 #endif
