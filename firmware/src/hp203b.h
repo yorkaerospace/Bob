@@ -1,7 +1,6 @@
 /* Simple, and probably bad, driver for the HP203B chip from HopeRF.
  * A correctly-configured HP203 struct can be created using the
- * HP203Init function. The chip can then be configured by setting the
- * channel and oversample values in that struct.
+ * HP203Init function.
  *
  * To read values off the chip start a measurement using HP203Measure
  * then read the values off the chip using one of the HP203Get...
@@ -11,6 +10,11 @@
 #ifndef HP203_H
 #define HP203_H
 
+#include <stdio.h>
+#include <stdbool.h>
+#include <stdint.h>
+
+#include "pico/stdlib.h"
 #include "hardware/i2c.h"
 
 #define HP203_ADDR 	0x76
@@ -35,24 +39,22 @@
 
 // Enum containing the settings for the channel
 enum HP203_CHN {
-    PRES_TEMP = 0x00,
-    TEMP_ONLY = 0x01
+    HP203_PRES_TEMP = 0x00,
+    HP203_TEMP_ONLY = 0x01
 };
 
 // Enum containing the various settings for the oversample rate
 enum HP203_OSR {
-    OSR_4096 = 0x00,
-    OSR_2028 = 0x01,
-    OSR_1024 = 0x02,
-    OSR_512  = 0x03,
-    OSR_256  = 0x04,
-    OSR_128  = 0x05
+    HP203_OSR_4096 = 0x00,
+    HP203_OSR_2028 = 0x01,
+    HP203_OSR_1024 = 0x02,
+    HP203_OSR_512  = 0x03,
+    HP203_OSR_256  = 0x04,
+    HP203_OSR_128  = 0x05
 };
 
 typedef struct hp203_t {
     i2c_inst_t * i2c;
-    enum HP203_CHN channel;
-    enum HP203_OSR oversample;
 } hp203_t;
 
 struct presTemp {
@@ -63,30 +65,41 @@ struct presTemp {
 /* Simple init function for HP203. */
 hp203_t HP203Init(i2c_inst_t * i2c);
 
-/* Reads bytes from the HP203 */
-int HP203ReadBytes(hp203_t * sensor, uint8_t * buffer, size_t len);
-
 /* Tests if the HP203 is functioning
  * Returns:
  * 0 if chip is functioning normally.
- * 1 if an i2c request times out.
- * 2 if the chip is either not connected, or somehow bad.
- * 3 if chip is not found.
+ * -1 if an i2c request times out.
+ * -2 if the chip is either not connected, or somehow bad.
+ * -3 if chip is not found.
  *
  * Function takes approximately 10 ms to run. */
-uint8_t HP203Test(hp203_t * sensor);
+int8_t HP203Test(hp203_t * sensor);
 
 /* Tells the HP203 to start measuring data.
- * Returns the expected measurement duration in us. */
-uint32_t HP203Measure(hp203_t * sensor);
+ * Returns:
+ * The expected measurement time in us if successful
+ * -1 if the I2C write times out
+ * -2 for other errors */
+int32_t HP203Measure(hp203_t * sensor, enum HP203_CHN channel, enum HP203_OSR OSR);
 
-/* Gets the pressure. Must be ran after a measurement has finished*/
-uint32_t HP203GetPres(hp203_t * sensor);
+/* Gets the pressure. Must be ran after a measurement has finished
+ * Returns:
+ * 0 on success,
+ * -1 if the I2C write times out
+ * -2 for other errors */
+int8_t HP203GetPres(hp203_t * sensor, uint32_t * result);
 
-/* Gets the Temperature. Must be ran after a measurement has finished*/
-uint32_t HP203GetTemp(hp203_t * sensor);
+/* Gets the Temperature. Must be ran after a measurement has finished
+ * Returns:
+ * 0 on success,
+ * -1 if the I2C write times out
+ * -2 for other errors */
+int8_t HP203GetTemp(hp203_t * sensor, uint32_t * result);
 
 /* Gets pressure and temperature in a single i2c read.
- * Returns a struct containing both. */
-struct presTemp HP203GetPresTemp(hp203_t * sensor);
+ * Returns:
+ * 0 on success
+ * 1 on failure */
+int8_t HP203GetPresTemp(hp203_t * sensor, struct presTemp * result);
+
 #endif
