@@ -22,6 +22,7 @@ static int QMCReadBytes(qmc_t * sensor, enum QMCRegister reg, size_t len, uint8_
 qmc_t QMCInit(i2c_inst_t * i2c) {
     qmc_t sensor;
     sensor.i2c = i2c;
+    QMCWriteByte(&sensor, QMC_SETRESET, 0x01);
     // Attempt to get the current config
     QMCGetCfg(&sensor);
     return sensor;
@@ -112,7 +113,7 @@ uint8_t QMCGetCfg(qmc_t * sensor) {
         sensor->config.mode = buffer[0] & 1;
         sensor->config.scale = (buffer[0] >> QMC_SCALE_SHIFT) & 1;
 
-        if(buffer[0] & 0x82) {
+        if(buffer[0] & 0x22) {
             invalid = true;
         }
 
@@ -132,7 +133,7 @@ uint8_t QMCGetMag(qmc_t * sensor, struct magData * data) {
     if(QMCReadBytes(sensor, QMC_XOUT_LSB, 6, buffer) == 6) {
         data->x = buffer[0] | (buffer[1] << 8);
         data->y = buffer[2] | (buffer[3] << 8);
-        data->z = buffer[4] | (buffer[4] << 8);
+        data->z = buffer[4] | (buffer[5] << 8);
     } else {
         return 1;
     }
