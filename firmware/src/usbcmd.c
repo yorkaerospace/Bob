@@ -7,11 +7,12 @@
 // TODO: Review this when I'm less tired and make sure its not terrible.
 
 static const char helpText[] =
-    "Bob Rev 3 running build: %s\n"
+    "Bob Rev 3 running build: %s %s\n"
     "Press:\n"
     "b to enter bootsel mode\n"
     "c to clear this tty\n"
-    "h to display this help text\n";
+    "h to display this help text\n"
+    "t to run self-test";
 
 static uint8_t state;
 static repeating_timer_t timer;
@@ -31,7 +32,7 @@ static bool usbCmdPoller() {
             printf("\033c");
             break;
         case 'h':
-            printf(helpText, __DATE__);
+            printf(helpText, __TIME__, __DATE__);
             break;
         }
         return true;
