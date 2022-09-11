@@ -137,3 +137,19 @@ uint8_t QMCGetMag(qmc_t * sensor, struct magData * data) {
         return 1;
     }
 }
+
+/* Reads temperature from the magnetometer and stores it in result
+ * Returns:
+ * 0 if successful.
+ * 1 if the i2c read failed. */
+uint8_t QMCGetTemp(qmc_t * sensor, int16_t * result) {
+    uint8_t buffer[2];
+    // Why doesnt it increment pointers thats so annoying >:(
+    if(QMCReadBytes(sensor, QMC_TEMP_LSB, 1, buffer) == 1 &&
+       QMCReadBytes(sensor, QMC_TEMP_MSB, 1, buffer + 1) == 1) {
+        *result = buffer[0] | (buffer[1] << 8);
+        return 0;
+    } else {
+        return 1;
+    }
+}
