@@ -14,10 +14,10 @@ git submodule init
 git submodule update
 
 # Tell CMake where the SDK is
-export PICO_SDK_PATH=../lib/pico-sdk
+export PICO_SDK_PATH=$SCRIPT_DIR/lib/pico-sdk
 
 # Tell CMake what we're building for
-export PICO_BOARD_HEADER_DIRS=..
+export PICO_BOARD_HEADER_DIRS=$SCRIPT_DIR
 
 # Clear bin folder and create a new one
 echo "Removing $SCRIPT_DIR/bin..."
