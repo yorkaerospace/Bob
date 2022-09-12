@@ -66,6 +66,14 @@ enum QMCOSR {              // OverSample Ratio; how many samples should be
 #define QMC_DOVL        1 // Overflow flag. Is high if any output goes out of range.
 #define QMC_DRDY        0 // Data ready. Is high if new data is ready.
 
+// Define error codes
+#define QMC_OK 0
+#define QMC_ERROR_TIMEOUT -1 // These line up with PICO_ERROR_TIMEOUT and
+#define QMC_ERROR_GENERIC -2 // PICO_ERROR_GENERIC
+#define QMC_ERROR_STANDBY -3 // The QMC is in standby mode
+#define QMC_ERROR_INVALID -4 // The QMC has an invalid config.
+
+// I2C constants
 #define QMC_ADDR     0x0D
 #define QMC_TIMEOUT  1000
 
@@ -76,8 +84,7 @@ struct qmc_cfg {          // Used for quick setting/analysis of QMC settings.
     enum QMCOSR OSR;
     bool pointerRoll;
     bool enableInterrupt;
-    uint8_t control1Raw;  // Only used by QMCGetCfg. Can be ignored otherwise.
-    uint8_t control2Raw;
+    uint8_t control[2];
 };
 
 struct qmc_status {
@@ -104,48 +111,48 @@ qmc_t QMCInit(i2c_inst_t * i2c);
 /* The QMC5883L doesnt have any real self-test capability, but we can
  * at least make sure it is talking properly and if it is configured correctly.
  * Returns:
- * 0 if the QMC is talking and is configured to produce data.
- * -1 if the QMC is talking, has a valid configuration, but is on standby.
- * -2 if the QMC has an invalid configuration.
- * -3 if the I2C hits a timeout
- * -4 for other errors */
+ * QMC_OK if the QMC is talking and is configured to produce data.
+ * QMC_ERROR_TIMEOUT if the QMC is on standby.
+ * QMC_ERROR_INVALID if the QMC has an invalid configuration.
+ * QMC_ERROR_TIMEOUT if the I2C hits a timeout
+ * QMC_ERROR_GENERIC for other errors */
 int8_t QMCTest(qmc_t * sensor);
 
 /* Reads and parses the QMC status register, places the result in status
  * Returns:
- * 0 if successful
- * -1 if the I2C times out
- * -2 for other errors */
+ * QMC_OK if successful
+ * QMC_ERROR_TIMEOUT if the I2C times out
+ * QMC_ERROR_GENERIC for other errors */
 int8_t QMCGetStatus(qmc_t * sensor, struct qmc_status * status);
 
 /* A quick way to configure the QMC5883L, based on config.
- * N.B. the control 1 & 2 raw fields in config can be safely ignored
+ * N.B. the control fields in config can be safely ignored
  * Returns:
- * 0 if successful
- * -1 if the I2C times out
- * -2 for other errors */
+ * QMC_OK if successful
+ * QMC_ERROR_TIMEOUT if the I2C times out
+ * QMC_ERROR_GENERIC for other errors */
 int8_t QMCSetCfg(qmc_t * sensor, struct qmc_cfg config);
 
 /* Reads and parses the config registers on the QMC5883L
  * Stores the result in sensor->config, alongside the raw registers.
  * Returns:
- * 0 if successful
- * -1 if the config is invalid
- * -2 if the i2c times out
- * -3 for other errors*/
+ * QMC_OK if successful
+ * QMC_ERROR_INVALID if the config is invalid
+ * QMC_ERROR_TIMEOUT if the i2c times out
+ * QMC_ERROR_GENERIC for other errors */
 int8_t QMCGetCfg(qmc_t * sensor);
 
 /* Reads data from the magnetometer and stores it in data
  * Returns:
- * 0 if successful.
- * -1 if the i2c times out.
- * -2 for other errors */
+ * QMC_OK if successful.
+ * QMC_ERROR_TIMEOUT if the i2c times out.
+ * QMC_ERROR_GENERIC for other errors */
 int8_t QMCGetMag(qmc_t * sensor, struct magData * data);
 
 /* Reads temperature from the magnetometer and stores it in result
  * Returns:
- * 0 if successful.
- * -1 if the i2c times out.
- * -2 for other errors */
+ * QMC_OK if successful.
+ * QMC_ERROR_TIMEOUT if the i2c times out.
+ * QMC_ERROR_GENERIC for other errors */
 int8_t QMCGetTemp(qmc_t * sensor, int16_t * result);
 #endif

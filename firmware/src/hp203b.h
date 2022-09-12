@@ -37,6 +37,12 @@
 // HP203 ADC_CVT settings
 #define HP203_OSR_SHIFT 2
 
+// HP203 error codes
+#define HP203_OK             0
+#define HP203_ERROR_TIMEOUT -1
+#define HP203_ERROR_GENERIC -2
+#define HP203_ERROR_BADCHIP -3
+
 // Enum containing the settings for the channel
 enum HP203_CHN {
     HP203_PRES_TEMP = 0x00,
@@ -67,10 +73,10 @@ hp203_t HP203Init(i2c_inst_t * i2c);
 
 /* Tests if the HP203 is functioning
  * Returns:
- * 0 if chip is functioning normally.
- * -1 if an i2c request times out.
- * -2 if the chip is either not connected, or somehow bad.
- * -3 if chip is not found.
+ * HP203_OK if chip is functioning normally.
+ * HP203_ERROR_TIMEOUT if an i2c request times out.
+ * HP203_ERROR_BADCHIP if the chip is somehow bad.
+ * HP203_ERROR_GENERIC for other errors.
  *
  * Function takes approximately 10 ms to run. */
 int8_t HP203Test(hp203_t * sensor);
@@ -78,28 +84,29 @@ int8_t HP203Test(hp203_t * sensor);
 /* Tells the HP203 to start measuring data.
  * Returns:
  * The expected measurement time in us if successful
- * -1 if the I2C write times out
- * -2 for other errors */
+ * HP203_ERROR_TIMEOUT if the I2C write times out
+ * HP203_ERROR_GENERIC for other errors */
 int32_t HP203Measure(hp203_t * sensor, enum HP203_CHN channel, enum HP203_OSR OSR);
 
 /* Gets the pressure. Must be ran after a measurement has finished
  * Returns:
- * 0 on success,
- * -1 if the I2C write times out
- * -2 for other errors */
+ * HP203_OK on success,
+ * HP203_ERROR_TIMEOUT if the I2C write times out
+ * HP203_ERROR_GENERIC for other errors */
 int8_t HP203GetPres(hp203_t * sensor, uint32_t * result);
 
 /* Gets the Temperature. Must be ran after a measurement has finished
  * Returns:
- * 0 on success,
- * -1 if the I2C write times out
- * -2 for other errors */
+ * HP203_OK on success,
+ * HP203_ERROR_TIMEOUT if the I2C write times out
+ * HP203_ERROR_GENERIC for other errors */
 int8_t HP203GetTemp(hp203_t * sensor, uint32_t * result);
 
 /* Gets pressure and temperature in a single i2c read.
  * Returns:
- * 0 on success
- * 1 on failure */
+ * HP203_OK on success,
+ * HP203_ERROR_TIMEOUT if the I2C write times out
+ * HP203_ERROR_GENERIC for other errors */
 int8_t HP203GetPresTemp(hp203_t * sensor, struct presTemp * result);
 
 #endif

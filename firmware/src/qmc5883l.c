@@ -31,30 +31,30 @@ qmc_t QMCInit(i2c_inst_t * i2c) {
 /* The QMC5883L doesnt have any real self-test capability, but we can
  * at least make sure it is talking properly and if it is configured correctly.
  * Returns:
- * 0 if the QMC is talking and is configured to produce data.
- * -1 if the QMC is talking, has a valid configuration, but is on standby.
- * -2 if the QMC has an invalid configuration.
- * -3 if the I2C hits a timeout
- * -4 for other errors */
+ * QMC_OK if the QMC is talking and is configured to produce data.
+ * QMC_ERROR_TIMEOUT if the QMC is on standby.
+ * QMC_ERROR_INVALID if the QMC has an invalid configuration.
+ * QMC_ERROR_TIMEOUT if the I2C hits a timeout
+ * QMC_ERROR_GENERIC for other errors */
 int8_t QMCTest(qmc_t * sensor) {
-    int8_t i2cStatus = QMCGetCfg(sensor);
-    switch(i2cStatus) {
+    int8_t cfgStatus = QMCGetCfg(sensor);
+    switch(cfgStatus) {
     case 0:
         if(sensor->config.mode != QMC_STANDBY) {
-            return 0;
+            return QMC_OK;
         } else {
-            return -1;
+            return QMC_ERROR_STANDBY;
         }
     default:
-        return i2cStatus - 1;
+        return cfgStatus;
     }
 }
 
 /* Reads and parses the QMC status register, places the result in status
  * Returns:
- * 0 if successful
- * -1 if the I2C times out
- * -2 for other errors */
+ * QMC_OK if successful
+ * QMC_ERROR_TIMEOUT if the I2C times out
+ * QMC_ERROR_GENERIC for other errors */
 int8_t QMCGetStatus(qmc_t * sensor, struct qmc_status * status) {
     uint8_t reg;
     int8_t i2cState = QMCReadBytes(sensor, QMC_STATUS, 1, &reg);
@@ -64,56 +64,49 @@ int8_t QMCGetStatus(qmc_t * sensor, struct qmc_status * status) {
         status->dataOverflow = reg & 1 << QMC_DOVL;
         status->dataSkip = reg & 1 << QMC_DSKIP;
         return 0;
-    } else if (i2cState == PICO_ERROR_TIMEOUT) {
-        return -1;
     } else {
-        return -2;
+        return i2cState == -1 ? QMC_ERROR_TIMEOUT : QMC_ERROR_GENERIC;
     }
 }
 
 /* A quick way to configure the QMC5883L, based on config.
- * N.B. the control 1 & 2 raw fields in config can be safely ignored
+ * N.B. the control fields in config can be safely ignored
  * Returns:
- * 0 if successful
- * -1 if the I2C times out
- * -2 for other errors */
+ * QMC_OK if successful
+ * QMC_ERROR_TIMEOUT if the I2C times out
+ * QMC_ERROR_GENERIC for other errors */
 int8_t QMCSetCfg(qmc_t * sensor, struct qmc_cfg config) {
 
-    config.control1Raw = config.mode            << QMC_MODE_SHIFT
-                       | config.ODR             << QMC_ODR_SHIFT
-                       | config.OSR             << QMC_OSR_SHIFT
-                       | config.scale           << QMC_SCALE_SHIFT;
+    config.control[0] = config.mode            << QMC_MODE_SHIFT
+                      | config.ODR             << QMC_ODR_SHIFT
+                      | config.OSR             << QMC_OSR_SHIFT
+                      | config.scale           << QMC_SCALE_SHIFT;
 
-    config.control2Raw = config.pointerRoll     << QMC_ROL_PNT
-                       | config.enableInterrupt << QMC_INT_ENB;
+    config.control[1] = config.pointerRoll     << QMC_ROL_PNT
+                      | config.enableInterrupt << QMC_INT_ENB;
 
     int8_t i2cState[2];
 
-    i2cState[0] = QMCWriteByte(sensor, QMC_CONTROL1, config.control1Raw);
-    i2cState[1] = QMCWriteByte(sensor, QMC_CONTROL2, config.control2Raw);
+    i2cState[0] = QMCWriteByte(sensor, QMC_CONTROL1, config.control[0]);
+    i2cState[1] = QMCWriteByte(sensor, QMC_CONTROL2, config.control[1]);
     /* The QMC only increments some pointers, so configuration has to be done as
      * 2 seperate writes. */
     if(i2cState[0] == 2 && i2cState[1] == 2) {
         sensor->config = config;
         return 0;
-    } else if (i2cState[0] == PICO_ERROR_GENERIC
-               || i2cState[1] == PICO_ERROR_GENERIC) {
-        return -2;
-    } else if (i2cState[0] == PICO_ERROR_TIMEOUT
-               || i2cState[1] == PICO_ERROR_TIMEOUT) {
-        return -1;
-    } else {
-        return -2;
+    } else {   // Return the worst bad error.
+        return i2cState[0] < i2cState[1] ?
+               i2cState[0] : i2cState[1];
     }
 }
 
 /* Reads and parses the config registers on the QMC5883L
  * Stores the result in sensor->config, alongside the raw registers.
  * Returns:
- * 0 if successful
- * -1 if the config is invalid
- * -2 if the i2c times out
- * -3 for other errors*/
+ * QMC_OK if successful
+ * QMC_ERROR_INVALID if the config is invalid
+ * QMC_ERROR_TIMEOUT if the i2c times out
+ * QMC_ERROR_GENERIC for other errors */
 int8_t QMCGetCfg(qmc_t * sensor) {
     uint8_t buffer[2];
     int8_t i2cState[2];
@@ -134,24 +127,19 @@ int8_t QMCGetCfg(qmc_t * sensor) {
             invalid = true;
         }
 
-        return invalid ? -1 : 0;
+        return invalid ? QMC_ERROR_INVALID : QMC_OK;
 
-    } else if (i2cState[0] == PICO_ERROR_GENERIC
-            || i2cState[1] == PICO_ERROR_GENERIC) {
-        return -3;
-    } else if (i2cState[0] == PICO_ERROR_TIMEOUT
-            || i2cState[1] == PICO_ERROR_TIMEOUT) {
-        return -2;
-    } else {
-        return -3;
+    } else {   // Return the worst bad error.
+        return i2cState[0] < i2cState[1] ?
+               i2cState[0] : i2cState[1];
     }
 }
 
 /* Reads data from the magnetometer and stores it in data
  * Returns:
- * 0 if successful.
- * -1 if the i2c times out.
- * -2 for other errors */
+ * QMC_OK if successful.
+ * QMC_ERROR_TIMEOUT if the i2c times out.
+ * QMC_ERROR_GENERIC for other errors */
 int8_t QMCGetMag(qmc_t * sensor, struct magData * data) {
     uint8_t buffer[6];
     int8_t i2cState = QMCReadBytes(sensor, QMC_XOUT_LSB, 6, buffer);
@@ -159,18 +147,17 @@ int8_t QMCGetMag(qmc_t * sensor, struct magData * data) {
         data->x = buffer[0] | (buffer[1] << 8);
         data->y = buffer[2] | (buffer[3] << 8);
         data->z = buffer[4] | (buffer[5] << 8);
-    } else if (i2cState == PICO_ERROR_TIMEOUT) {
-        return -1;
     } else {
-        return -2;
+        return i2cState == QMC_ERROR_TIMEOUT ?
+               QMC_ERROR_TIMEOUT : QMC_ERROR_GENERIC;
     }
 }
 
 /* Reads temperature from the magnetometer and stores it in result
  * Returns:
- * 0 if successful.
- * -1 if the i2c times out.
- * -2 for other errors */
+ * QMC_OK if successful.
+ * QMC_ERROR_TIMEOUT if the i2c times out.
+ * QMC_ERROR_GENERIC for other errors */
 int8_t QMCGetTemp(qmc_t * sensor, int16_t * result) {
     uint8_t buffer[2];
     int8_t i2cState[2];
@@ -181,13 +168,8 @@ int8_t QMCGetTemp(qmc_t * sensor, int16_t * result) {
     if(i2cState[0] == 1 && i2cState[1] == 1) {
         *result = buffer[0] | (buffer[1] << 8);
         return 0;
-    } else if (i2cState[0] == PICO_ERROR_GENERIC
-               || i2cState[1] == PICO_ERROR_GENERIC) {
-        return -2;
-    } else if (i2cState[0] == PICO_ERROR_TIMEOUT
-               || i2cState[1] == PICO_ERROR_TIMEOUT) {
-        return -1;
-    } else {
-        return -2;
+    } else {   // Return the worst bad error.
+        return i2cState[0] < i2cState[1] ?
+               i2cState[0] : i2cState[1];
     }
 }
