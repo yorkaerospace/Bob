@@ -19,13 +19,10 @@ export PICO_SDK_PATH=$SCRIPT_DIR/lib/pico-sdk
 # Tell CMake what we're building for
 export PICO_BOARD_HEADER_DIRS=$SCRIPT_DIR
 
-if [ -d bin ]
+if [ ! -d bin ]
    then
-       # Clear bin folder and create a new one
-       echo "Removing $SCRIPT_DIR/bin..."
-       rm -rI bin # I dont trust my bash skills, so you're getting prompted.
+       mkdir bin
 fi
-mkdir bin
 
 # Make the makefiles
 cd bin
