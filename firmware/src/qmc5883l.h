@@ -95,6 +95,7 @@ struct magData {
 typedef struct qmc_t {
     i2c_inst_t * i2c;
     struct qmc_cfg config;
+    int16_t calib[3];
 } qmc_t;
 
 /* Creates a QMC_T */
@@ -104,41 +105,47 @@ qmc_t QMCInit(i2c_inst_t * i2c);
  * at least make sure it is talking properly and if it is configured correctly.
  * Returns:
  * 0 if the QMC is talking and is configured to produce data.
- * 1 if the QMC is talking, has a valid configuration, but is on standby.
- * 2 if the QMC has an invalid configuration.
- * 3 if the QMC is not talking */
-uint8_t QMCTest(qmc_t * sensor);
+ * -1 if the QMC is talking, has a valid configuration, but is on standby.
+ * -2 if the QMC has an invalid configuration.
+ * -3 if the I2C hits a timeout
+ * -4 for other errors */
+int8_t QMCTest(qmc_t * sensor);
 
 /* Reads and parses the QMC status register, places the result in status
  * Returns:
  * 0 if successful
- * 1 if the I2C read failed */
-uint8_t QMCGetStatus(qmc_t * sensor, struct qmc_status * status);
+ * -1 if the I2C times out
+ * -2 for other errors */
+int8_t QMCGetStatus(qmc_t * sensor, struct qmc_status * status);
 
 /* A quick way to configure the QMC5883L, based on config.
  * N.B. the control 1 & 2 raw fields in config can be safely ignored
  * Returns:
  * 0 if successful
- * 1 if the I2C failed */
-uint8_t QMCSetCfg(qmc_t * sensor, struct qmc_cfg config);
+ * -1 if the I2C times out
+ * -2 for other errors */
+int8_t QMCSetCfg(qmc_t * sensor, struct qmc_cfg config);
 
 /* Reads and parses the config registers on the QMC5883L
  * Stores the result in sensor->config, alongside the raw registers.
  * Returns:
  * 0 if successful
- * 1 if the config is invalid
- * 2 if the I2C failed */
-uint8_t QMCGetCfg(qmc_t * sensor);
+ * -1 if the config is invalid
+ * -2 if the i2c times out
+ * -3 for other errors*/
+int8_t QMCGetCfg(qmc_t * sensor);
 
 /* Reads data from the magnetometer and stores it in data
  * Returns:
  * 0 if successful.
- * 1 if the i2c read failed. */
-uint8_t QMCGetMag(qmc_t * sensor, struct magData * data);
+ * -1 if the i2c times out.
+ * -2 for other errors */
+int8_t QMCGetMag(qmc_t * sensor, struct magData * data);
 
 /* Reads temperature from the magnetometer and stores it in result
  * Returns:
  * 0 if successful.
- * 1 if the i2c read failed.*/
- uint8_t QMCGetTemp(qmc_t * sensor, int16_t * result);
+ * -1 if the i2c times out.
+ * -2 for other errors */
+int8_t QMCGetTemp(qmc_t * sensor, int16_t * result);
 #endif
