@@ -37,19 +37,16 @@ qmc_t QMCInit(i2c_inst_t * i2c) {
  * -3 if the I2C hits a timeout
  * -4 for other errors */
 int8_t QMCTest(qmc_t * sensor) {
-    switch(QMCGetCfg(sensor)) {
+    int8_t i2cStatus = QMCGetCfg(sensor);
+    switch(i2cStatus) {
     case 0:
         if(sensor->config.mode != QMC_STANDBY) {
             return 0;
         } else {
             return -1;
         }
-    case -1:
-        return -2;
-    case -2:
-        return -3;
     default:
-        return -4;
+        return i2cStatus - 1;
     }
 }
 
