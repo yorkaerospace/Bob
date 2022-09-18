@@ -2,8 +2,7 @@
 
 # Generates the bin folder and all the makefiles within it.
 # Will automatically clear the bin folder before starting.
-# Any arguments passed to this script will be passed to CMake.
-# You shouldnt need to run this *that* often, but CMake is weird.
+# Set -D to generate a debug build, which will be copied directly to RAM.
 
 # Where are we?
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
@@ -26,4 +25,4 @@ fi
 
 # Make the makefiles
 cd bin
-cmake -DPICO_BOARD=bob "$@" ../src
+cmake ../src

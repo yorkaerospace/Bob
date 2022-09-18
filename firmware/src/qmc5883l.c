@@ -5,17 +5,17 @@ static int QMCWriteByte(qmc_t * sensor, enum QMCRegister reg, uint8_t value) {
     uint8_t buffer[2];
     buffer[0] = reg;
     buffer[1] = value;
-    return i2c_write_timeout_us(sensor->i2c, QMC_ADDR, &buffer,
-                                2, true, QMC_TIMEOUT);
+    return i2c_write_timeout_per_char_us(sensor->i2c, QMC_ADDR, &buffer,
+                                         2, true, QMC_TIMEOUT);
 }
 
 /* Wrapper around i2c read function */
 static int QMCReadBytes(qmc_t * sensor, enum QMCRegister reg, size_t len, uint8_t * buffer) {
     uint8_t regShort = reg; // Trim the enum to a uint8_t.
-    i2c_write_timeout_us(sensor->i2c, QMC_ADDR, &regShort,
-                        1, true, QMC_TIMEOUT);
-    return i2c_read_timeout_us(sensor->i2c, QMC_ADDR, buffer,
-                               len, false, QMC_TIMEOUT);
+    i2c_write_timeout_per_char_us(sensor->i2c, QMC_ADDR, &regShort,
+                                  1, true, QMC_TIMEOUT);
+    return i2c_read_timeout_per_char_us(sensor->i2c, QMC_ADDR, buffer,
+                                        len, false, QMC_TIMEOUT);
 }
 
 /* Creates a QMC_T */

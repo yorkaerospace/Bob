@@ -8,18 +8,20 @@ set(CMAKE_CXX_STANDARD 17)
 pico_sdk_init()
 
 set(sources main.c
-            bob.h
             hp203b.c
             hp203b.h
             qmc5883l.c
             qmc5883l.h
             usbcmd.c
-            usbcmd.h)
+            usbcmd.h
+            qmi8658c.c
+            qmi8658c.h)
 
 add_executable(Bob
   main.c
   hp203b.c
   qmc5883l.c
+  qmi8658c.c
   usbcmd.c
 )
 
