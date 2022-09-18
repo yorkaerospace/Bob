@@ -2,11 +2,9 @@
 #include "pico/stdlib.h"
 #include "hardware/i2c.h"
 
-
-// TODO: Make this less cursed
-#include "../lib/hp203b/hp203b.h"
-#include "../lib/qmc5883l/qmc5883l.h"
-#include "../lib/qmi8658c/qmi8658c.h"
+#include <hp203b.h>
+#include <qmc5883l.h>
+#include <qmi8658c.h>
 #include "usbcmd.h"
 
 void loopPrint(char * str) {
