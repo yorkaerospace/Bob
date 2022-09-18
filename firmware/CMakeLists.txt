@@ -7,25 +7,18 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 pico_sdk_init()
 
-set(sources main.c
-            hp203b.c
-            hp203b.h
-            qmc5883l.c
-            qmc5883l.h
-            usbcmd.c
-            usbcmd.h
-            qmi8658c.c
-            qmi8658c.h)
+set(sources src/main.c
+            src/usbcmd.c
+            src/usbcmd.h)
 
 add_executable(Bob
-  main.c
-  hp203b.c
-  qmc5883l.c
-  qmi8658c.c
-  usbcmd.c
+  src/main.c
+  src/usbcmd.c
 )
 
-target_link_libraries(Bob pico_stdlib hardware_i2c)
+add_subdirectory(lib)
+
+target_link_libraries(Bob QMI8658C HP203B QMC5883L pico_stdlib hardware_i2c)
 
 pico_enable_stdio_usb(Bob 1)
 
