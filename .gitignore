@@ -35,3 +35,14 @@ fp-info-cache
 *.gbr
 *.gbrjob
 *.drl
+
+# CMake
+*CMakeCache*
+*cmake
+*Makefile*
+*CMakeFiles*
+*cmake_install.cmake*
+
+
+# Random
+.ccls-cache

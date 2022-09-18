@@ -1,6 +1,3 @@
-[submodule "firmware/lib/pico-sdk"]
-	path = firmware/lib/pico-sdk
-	url = https://github.com/raspberrypi/pico-sdk.git
 [submodule "kicad/YAR-Kicad-Libs"]
 	path = kicad/YAR-Kicad-Libs
 	url = https://github.com/yorkaerospace/YAR-Kicad-Libs.git

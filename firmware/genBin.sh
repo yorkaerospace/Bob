@@ -4,7 +4,7 @@
 # Will automatically clear the bin folder before starting.
 # Set -D to generate a debug build, which will be copied directly to RAM.
 
-# Where are we?
+# Where is the scritp?
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd $SCRIPT_DIR
 
@@ -13,16 +13,17 @@ git submodule init
 git submodule update
 
 # Tell CMake where the SDK is
-export PICO_SDK_PATH=$SCRIPT_DIR/lib/pico-sdk
+# export PICO_SDK_PATH=$SCRIPT_DIR/lib/pico-sdk
 
 # Tell CMake what we're building for
-export PICO_BOARD_HEADER_DIRS=$SCRIPT_DIR
+# export PICO_BOARD_HEADER_DIRS=$SCRIPT_DIR
 
-if [ ! -d bin ]
-   then
-       mkdir bin
-fi
+mkdir -p bin
 
 # Make the makefiles
 cd bin
+<<<<<<< HEAD
 cmake ../src
+=======
+cmake -DPICO_BOARD=bob -DPICO_BOARD_HEADER_DIRS=$SCRIPT_DIR -DPICO_SDK_PATH=$SCRIPT_DIR"/lib/pico-sdk" "$@" ../src
+>>>>>>> origin/platform
