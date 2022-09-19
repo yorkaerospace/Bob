@@ -9,7 +9,7 @@ hp203_t HP203Init(i2c_inst_t * i2c) {
 
 /* Sends a command to the HP203 */
 static int HP203SendCommand(hp203_t * sensor, uint8_t command) {
-   return i2c_write_timeout_per_char_us(sensor->i2c,
+    return i2c_write_timeout_per_char_us(sensor->i2c,
                                         HP203_ADDR,
                                         &command,
                                         1,
@@ -19,12 +19,11 @@ static int HP203SendCommand(hp203_t * sensor, uint8_t command) {
 
 /* Reads bytes from the HP203 */
 static int HP203ReadBytes(hp203_t * sensor, uint8_t * buffer, size_t len) {
-    return i2c_read_timeout_per_char_us(sensor->i2c,
-                                        HP203_ADDR,
-                                        buffer,
-                                        len,
-                                        false,
-                                        HP203_TIMEOUT);
+    return i2c_read_blocking(sensor->i2c,
+                                   HP203_ADDR,
+                                   buffer,
+                                   len,
+                                   false);
 }
 
 /* Tests if the HP203 is functioning
@@ -36,7 +35,7 @@ static int HP203ReadBytes(hp203_t * sensor, uint8_t * buffer, size_t len) {
  *
  * Function takes approximately 10 ms to run. */
 int8_t HP203Test(hp203_t * sensor) {
-    uint8_t buffer;
+    uint8_t buffer[1];
     int result[3];              // Used to store the result of operations
 
     result[0] = HP203SendCommand(sensor, HP203_RESET);
@@ -44,10 +43,11 @@ int8_t HP203Test(hp203_t * sensor) {
     sleep_ms(10);               // Wait until the sensor is stable.
 
     result[1] = HP203SendCommand(sensor, HP203_READ_REG | HP203_INT_SRC);
-    result[2] = HP203ReadBytes(sensor, &buffer, 1);
+    result[2] = HP203ReadBytes(sensor, buffer, 1);
 
     // Look over the results and figure out what to return.
-
+    printf("talking");
+    sleep_ms(10);
     int i;
     // If theres an error, find the most bad error
     if(result[0] < 0 || result[1] < 0 || result[2] < 0) {
@@ -55,7 +55,7 @@ int8_t HP203Test(hp203_t * sensor) {
               (result[0] < result[2] ? result[0] : result[2]):
               (result[1] < result[2] ? result[1] : result[2]);
     } else { // Check the 6th bit.
-        return (buffer & 0x20) == 0 ?
+        return (buffer[0] & 0x20) != 0 ?
                HP203_ERROR_BADCHIP : HP203_OK;
     }
 }
