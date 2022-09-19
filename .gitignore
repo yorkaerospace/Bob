@@ -42,7 +42,7 @@ fp-info-cache
 *Makefile*
 *CMakeFiles*
 *cmake_install.cmake*
-
+!pico_sdk_import.cmake
 
 # Random
 .ccls-cache
