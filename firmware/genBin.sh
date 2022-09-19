@@ -12,7 +12,7 @@ cd $SCRIPT_DIR
 git submodule init
 git submodule update
 
-CMAKE_ARGS=$(-DPICO_BOARD=bob -DPICO_BOARD_HEADER_DIRS=$SCRIPT_DIR $@)
+CMAKE_ARGS="-DPICO_BOARD=bob -DPICO_BOARD_HEADER_DIRS=$SCRIPT_DIR/src $@"
 
 mkdir -p bin
 
