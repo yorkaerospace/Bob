@@ -72,7 +72,6 @@ int main() {
             printf("AX: %d, AY: %d, AZ: %d, GX: %d, GY: %d, GZ: %d\n",
                    imu.accel[0], imu.accel[1], imu.accel[2], imu.gyro[0], imu.gyro[1], imu.gyro[2]);
             sleep_ms(1000);
-            printf("loop\n");
         }
         break;
     case -1:

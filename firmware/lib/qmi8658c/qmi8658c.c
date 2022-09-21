@@ -15,10 +15,10 @@ static int8_t QMIReadBytes(qmi_t * qmi, enum QMIRegister reg, uint8_t * buffer, 
     for(i = 0; i < len; i++) {
         i2cState[0] = i2c_write_timeout_per_char_us(qmi->i2c, qmi->addr,
                                            &buf, 1, false,
-                                           QMI_TIMEOUT * len);
+                                           QMI_TIMEOUT);
         i2cState[1] = i2c_read_timeout_per_char_us(qmi->i2c, qmi->addr,
-                                          buffer + i, len, false,
-                                          QMI_TIMEOUT * len);
+                                          buffer + i, 1, false,
+                                          QMI_TIMEOUT);
         if (i2cState[0] < 0 && i2cState[1] < 0)  {
             return i2cState[0] < i2cState[1] ?
                    i2cState[0] : i2cState[1];
