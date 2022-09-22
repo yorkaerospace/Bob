@@ -44,13 +44,14 @@ int main() {
     qmi = QMIInit(i2c_default, true);
 
 
-    sleep_ms(10000);
     printf("Starting config\n");
     printf("Configuring IMU\n");
-    QMIAccConfig(&qmi, QMI_ACC_125HZ, QMI_ACC_16G);
     QMIGyroConfig(&qmi, QMI_GYRO_125HZ, QMI_GYRO_256DPS);
-    QMISetOption(&qmi, QMI_ACC_ENABLE, true);
     QMISetOption(&qmi, QMI_GYRO_ENABLE, true);
+    QMISetOption(&qmi, QMI_GYRO_SNOOZE, false);
+
+    QMIAccConfig(&qmi, QMI_ACC_125HZ, QMI_ACC_16G);
+    QMISetOption(&qmi, QMI_ACC_ENABLE, true);
     printf("Configuring Compass\n");
     QMCSetCfg(&qmc, qmcCfg);
 
@@ -69,8 +70,8 @@ int main() {
             sleep_ms(10);
             printf("X: %d, Y: %d, Z: %d, Temp: %d,\n", mag.x, mag.y, mag.z, magTemp);
             sleep_ms(10);
-            printf("AX: %d, AY: %d, AZ: %d, GX: %d, GY: %d, GZ: %d\n",
-                   imu.accel[0], imu.accel[1], imu.accel[2], imu.gyro[0], imu.gyro[1], imu.gyro[2]);
+            printf("AX: %d, AY: %d, AZ: %d, GX: %d, GY: %d, GZ: %d CTRL7: %x\n",
+                   imu.accel[0], imu.accel[1], imu.accel[2], imu.gyro[0], imu.gyro[1], imu.gyro[2], CTRL7);
             sleep_ms(1000);
         }
         break;

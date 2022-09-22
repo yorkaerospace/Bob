@@ -64,7 +64,7 @@ int16_t QMISetOption(qmi_t * qmi, enum QMIOpt option, bool set) {
     uint8_t CTRL7;
     int8_t i2cStatus = QMIReadBytes(qmi, QMI_CTRL_ENB, &CTRL7, 1);
     if(i2cStatus == QMI_OK) {
-        CTRL7 = set ? CTRL7 | option : CTRL7 & ~option;
+        CTRL7 = set ? CTRL7 | (1 << option) : CTRL7 & ~(1 << option);
         i2cStatus = QMIWriteByte(qmi, QMI_CTRL_ENB, CTRL7);
         if (i2cStatus == QMI_OK) {
             return CTRL7;
