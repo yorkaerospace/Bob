@@ -38,14 +38,45 @@ qmi_t QMIInit(i2c_inst_t * i2c, bool SA0) {
 }
 
 /* The QMI has a self test system, but THEY HAVENT DOCUMENTED IT YET >:(
- * Checks if the QMI talks. Returns:
- * QMI_OK if everything seems good.
+ * Checks if the QMI talks and if the config is good. Returns:
+
+ * QMI_NO_GYRO if the gyro is disabled
+ * QMI_NO_ACCL if the accelerometer is disabled
+ * QMI_NO_SENSORS if both sensors are disabled
+ * QMI_OK if everything seems good, and both sensors are enabled
  * QMI_ERROR_TIMEOUT if the I2C timesout.
+ * QMI_ERROR_BAD_CONF if the sensor configuration is invalid.
  * QMI_ERROR_GENERIC for other errors.
  *
  * N.B. If you're getting QMI_GENERIC errors, check that SA0 is set correctly */
 int8_t QMITest(qmi_t * qmi) {
-    return QMIReadBytes(qmi, QMI_WHO_AM_I, NULL, 1);
+    uint8_t CTRL7;
+    uint8_t CTRLACC;
+    int8_t i2cStatus[2];
+    int8_t worstErr;
+
+    i2cStatus[0] = QMIReadBytes(qmi, QMI_CTRL_ENB, &CTRL7, 1);
+    i2cStatus[1] = QMIReadBytes(qmi, QMI_CTRL_ACC, &CTRLACC, 1);
+
+    worstErr = MIN(i2cStatus[0], i2cStatus[1]);
+
+    if(worstErr < 0) {
+        // If theres an error with the i2c, return the worst one
+        return worstErr;
+    } else if (CTRL7 & QMI_GYRO_ENABLE && CTRLACC & 0x0F > QMI_ACC_LP_128HZ) {
+        // Tests if the user is attempting to use the QMI gyro in low power mode
+        return QMI_ERROR_BAD_CONF;
+    } else if (CTRL7 & (QMI_GYRO_ENABLE | QMI_ACC_ENABLE) == 0) {
+        // Tests if both sensors are disabled
+        return QMI_NO_SENSORS;
+    } else if (CTRL7 & QMI_GYRO_ENABLE == 0) {
+        return QMI_NO_GYRO;
+    } else if (CTRL7 & QMI_ACC_ENABLE == 0) {
+        return QMI_NO_ACC;
+    } else {
+        return QMI_OK;
+    }
+
 }
 
 /* Turns an option on or off.
@@ -64,7 +95,7 @@ int16_t QMISetOption(qmi_t * qmi, enum QMIOpt option, bool set) {
     uint8_t CTRL7;
     int8_t i2cStatus = QMIReadBytes(qmi, QMI_CTRL_ENB, &CTRL7, 1);
     if(i2cStatus == QMI_OK) {
-        CTRL7 = set ? CTRL7 | (1 << option) : CTRL7 & ~(1 << option);
+        CTRL7 = set ? CTRL7 | option : CTRL7 & ~(option);
         i2cStatus = QMIWriteByte(qmi, QMI_CTRL_ENB, CTRL7);
         if (i2cStatus == QMI_OK) {
             return CTRL7;

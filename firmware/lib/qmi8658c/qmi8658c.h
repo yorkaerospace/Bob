@@ -105,18 +105,22 @@ enum QMIGyroODR {
 
 // Settings for the CTRL7 register
 enum QMIOpt {
-    QMI_ACC_ENABLE = 0x00,
-    QMI_GYRO_ENABLE = 0x01,
-    QMI_GYRO_SNOOZE = 0x04,
-    QMI_SYS_HS = 0x06,      // Dont play with these.
-    QMI_SYNC_SMPL = 0x07    // I forgot to wire the interrupts in. Cope.
+    QMI_ACC_ENABLE  = 1 << 0,
+    QMI_GYRO_ENABLE = 1 << 1,
+    QMI_GYRO_SNOOZE = 1 << 4,
+    QMI_SYS_HS      = 1 << 6,
+    QMI_SYNC_SMPL   = 1 << 7
 };
 
 // Status codes
 enum QMIStatus {
-    QMI_OK = 0,
-    QMI_ERROR_TIMEOUT = -1,
-    QMI_ERROR_GENERIC = -2
+    QMI_NO_GYRO        =  3,
+    QMI_NO_ACCEL       =  2,
+    QMI_NO_SENSORS     =  1,
+    QMI_OK             =  0,
+    QMI_ERROR_TIMEOUT  = -1,
+    QMI_ERROR_GENERIC  = -2,
+    QMI_ERROR_BAD_CONF = -3
 };
 
 #define QMI_ADDR 0x6A       // Can be changed to 0x6B by pulling SA0 high.
