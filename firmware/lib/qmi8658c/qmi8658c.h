@@ -144,9 +144,14 @@ struct qmi_data {
 qmi_t QMIInit(i2c_inst_t * i2c, bool SA0);
 
 /* The QMI has a self test system, but THEY HAVENT DOCUMENTED IT YET >:(
- * Checks if the QMI talks. Returns:
- * QMI_OK if everything seems good.
+ * Checks if the QMI talks and if the config is good. Returns:
+
+ * QMI_NO_GYRO if the gyro is disabled
+ * QMI_NO_ACCL if the accelerometer is disabled
+ * QMI_NO_SENSORS if both sensors are disabled
+ * QMI_OK if everything seems good, and both sensors are enabled
  * QMI_ERROR_TIMEOUT if the I2C timesout.
+ * QMI_ERROR_BAD_CONF if the sensor configuration is invalid.
  * QMI_ERROR_GENERIC for other errors.
  *
  * N.B. If you're getting QMI_GENERIC errors, check that SA0 is set correctly */
