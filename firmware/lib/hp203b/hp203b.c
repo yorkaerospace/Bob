@@ -104,7 +104,7 @@ int8_t HP203GetPres(hp203_t * sensor, uint32_t * result) {
  * HP203_OK on success,
  * HP203_ERROR_TIMEOUT if the I2C write times out
  * HP203_ERROR_GENERIC for other errors */
-int8_t HP203GetTemp(hp203_t * sensor, uint32_t * result) {
+int8_t HP203GetTemp(hp203_t * sensor, int32_t * result) {
     uint8_t buffer[3];
     int i2cState[2];
 
@@ -113,6 +113,7 @@ int8_t HP203GetTemp(hp203_t * sensor, uint32_t * result) {
 
     if(i2cState[0] == 1 && i2cState[1] == 3) {
         *result = buffer[2] | buffer[1] << 8 | buffer[0] << 16;
+        *result |= result & 1 << 20 ? 0xFFF00000 : 0;
         return 0;
     } else {   // Return the worst bad error.
         return i2cState[0] < i2cState[1] ?
@@ -135,6 +136,7 @@ int8_t HP203GetPresTemp(hp203_t * sensor, struct presTemp * result) {
     if(i2cState[0] == 1 && i2cState[1] == 6) {
         result->pres = buffer[5] | buffer[4] << 8 | buffer[3] << 16;
         result->temp = buffer[2] | buffer[1] << 8 | buffer[0] << 16;
+        result->temp |= result->temp & 1 << 20 ? 0xFFF00000 : 0;
     } else {   // Return the worst bad error.
         return i2cState[0] < i2cState[1] ?
                i2cState[0] : i2cState[1];

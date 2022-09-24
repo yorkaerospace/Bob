@@ -100,7 +100,7 @@ int8_t HP203GetPres(hp203_t * sensor, uint32_t * result);
  * HP203_OK on success,
  * HP203_ERROR_TIMEOUT if the I2C write times out
  * HP203_ERROR_GENERIC for other errors */
-int8_t HP203GetTemp(hp203_t * sensor, uint32_t * result);
+int8_t HP203GetTemp(hp203_t * sensor, int32_t * result);
 
 /* Gets pressure and temperature in a single i2c read.
  * Returns:
