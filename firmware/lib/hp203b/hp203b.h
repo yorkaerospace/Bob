@@ -63,7 +63,7 @@ typedef struct hp203_t {
     i2c_inst_t * i2c;
 } hp203_t;
 
-struct presTemp {
+struct hp203_data {
     uint32_t pres;
     int32_t temp;
 };
@@ -107,6 +107,6 @@ int8_t HP203GetTemp(hp203_t * sensor, int32_t * result);
  * HP203_OK on success,
  * HP203_ERROR_TIMEOUT if the I2C write times out
  * HP203_ERROR_GENERIC for other errors */
-int8_t HP203GetPresTemp(hp203_t * sensor, struct presTemp * result);
+int8_t HP203GetPresTemp(hp203_t * sensor, struct hp203_data * result);
 
 #endif
