@@ -75,7 +75,7 @@ int32_t HP203Measure(hp203_t * sensor, enum HP203_CHN channel, enum HP203_OSR OS
 
     int i2cState = HP203SendCommand(sensor, command);
 
-    return i2cState == 1 ? timeLookup[channel + OSR >> 1] : i2cState;
+    return i2cState == 1 ? timeLookup[channel + OSR] : i2cState;
 }
 
 /* Gets the pressure. Must be ran after a measurement has finished
