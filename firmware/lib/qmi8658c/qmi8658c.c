@@ -72,7 +72,7 @@ int8_t QMITest(qmi_t * qmi) {
     } else if (CTRL7 & QMI_GYRO_ENABLE == 0) {
         return QMI_NO_GYRO;
     } else if (CTRL7 & QMI_ACC_ENABLE == 0) {
-        return QMI_NO_ACC;
+        return QMI_NO_ACCEL;
     } else {
         return QMI_OK;
     }

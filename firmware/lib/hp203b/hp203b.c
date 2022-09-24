@@ -113,7 +113,7 @@ int8_t HP203GetTemp(hp203_t * sensor, int32_t * result) {
 
     if(i2cState[0] == 1 && i2cState[1] == 3) {
         *result = buffer[2] | buffer[1] << 8 | buffer[0] << 16;
-        *result |= result & 1 << 20 ? 0xFFF00000 : 0;
+        *result |= *result & 1 << 20 ? 0xFFF00000 : 0;
         return 0;
     } else {   // Return the worst bad error.
         return i2cState[0] < i2cState[1] ?
