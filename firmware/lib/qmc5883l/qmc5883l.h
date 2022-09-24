@@ -93,12 +93,6 @@ struct qmc_status {
     bool dataSkip;
 };
 
-struct magData {
-    int16_t x;
-    int16_t y;
-    int16_t z;
-};
-
 typedef struct qmc_t {
     i2c_inst_t * i2c;
     struct qmc_cfg config;
@@ -142,12 +136,14 @@ int8_t QMCSetCfg(qmc_t * sensor, struct qmc_cfg config);
  * QMC_ERROR_GENERIC for other errors */
 int8_t QMCGetCfg(qmc_t * sensor);
 
-/* Reads data from the magnetometer and stores it in data
+/* Reads data from the magnetometer and stores it in data.
+ * Assumes data is the first element of a 3 long array.
+ *
  * Returns:
  * QMC_OK if successful.
  * QMC_ERROR_TIMEOUT if the i2c times out.
  * QMC_ERROR_GENERIC for other errors */
-int8_t QMCGetMag(qmc_t * sensor, struct magData * data);
+int8_t QMCGetMag(qmc_t * sensor, int16_t * data);
 
 /* Reads temperature from the magnetometer and stores it in result
  * Returns:

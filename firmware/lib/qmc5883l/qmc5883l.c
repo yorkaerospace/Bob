@@ -135,18 +135,20 @@ int8_t QMCGetCfg(qmc_t * sensor) {
     }
 }
 
-/* Reads data from the magnetometer and stores it in data
+/* Reads data from the magnetometer and stores it in data.
+ * Assumes data is the first element of a 3 long array.
+ *
  * Returns:
  * QMC_OK if successful.
  * QMC_ERROR_TIMEOUT if the i2c times out.
  * QMC_ERROR_GENERIC for other errors */
-int8_t QMCGetMag(qmc_t * sensor, struct magData * data) {
+int8_t QMCGetMag(qmc_t * sensor, int16_t * data) {
     uint8_t buffer[6];
     int8_t i2cState = QMCReadBytes(sensor, QMC_XOUT_LSB, 6, buffer);
     if(i2cState == 6) {
-        data->x = buffer[0] | (buffer[1] << 8);
-        data->y = buffer[2] | (buffer[3] << 8);
-        data->z = buffer[4] | (buffer[5] << 8);
+        data[0] = buffer[0] | (buffer[1] << 8);
+        data[1] = buffer[2] | (buffer[3] << 8);
+        data[2] = buffer[4] | (buffer[5] << 8);
     } else {
         return i2cState == QMC_ERROR_TIMEOUT ?
                QMC_ERROR_TIMEOUT : QMC_ERROR_GENERIC;
