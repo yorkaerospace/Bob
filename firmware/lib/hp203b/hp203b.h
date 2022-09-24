@@ -65,7 +65,7 @@ typedef struct hp203_t {
 
 struct presTemp {
     uint32_t pres;
-    uint32_t temp;
+    int32_t temp;
 };
 
 /* Simple init function for HP203. */
