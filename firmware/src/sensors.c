@@ -1,5 +1,14 @@
 #include "sensors.h"
 
+#include "pico/stdlib.h"
+#include "hardware/i2c.h"
+
+#include <hp203b.h>
+#include <qmc5883l.h>
+#include <qmi8658c.h>
+#include <stdint.h>
+#include <string.h>
+
 static hp203_t hp203;
 static qmc_t qmc;
 static qmi_t qmi;

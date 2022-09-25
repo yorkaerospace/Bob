@@ -1,39 +1,8 @@
 #ifndef SENSORS_H
 #define SENSORS_H
 
-#include "pico/stdlib.h"
-#include "hardware/i2c.h"
-
-#include <hp203b.h>
-#include <qmc5883l.h>
-#include <qmi8658c.h>
 #include <stdint.h>
-#include <string.h>
-
-// Consitent naming schemes are for chumps.
-typedef struct {
-    uint32_t pres;    // Pressure in pascals
-    int32_t temp;     // Temperature in centidegrees.
-
-    int16_t mag[3];   // Raw magentometer output X, Y, Z;
-
-    int16_t accel[3]; // Raw IMU output X, Y, Z;
-    int16_t gyro[3];
-
-    uint32_t time;    // Time since boot in ms
-    uint8_t status;   // Bitfield for status flags. See below.
-} data_t;
-
-enum statusFlags {
-    NO_BARO = 1 << 0, // Sensors disabled or faulty
-    NO_GYRO = 1 << 1,
-    NO_ACCL = 1 << 2,
-    NO_COMP = 1 << 3,
-    LAUNCH  = 1 << 4, // State changes on launch
-    APOGEE  = 1 << 5,
-    LANDING = 1 << 6,
-    FAULT   = 1 << 7  // Recovered from a fault
-};
+#include "data.h"
 
 /* Initialises the sensors and the associated i2c bus */
 void configureSensors(void);
