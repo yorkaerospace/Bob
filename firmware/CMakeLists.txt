@@ -9,11 +9,14 @@ pico_sdk_init()
 
 set(sources src/main.c
             src/usbcmd.c
-            src/usbcmd.h)
+            src/usbcmd.h
+            src/sensors.c
+            src/sensors.h)
 
 add_executable(Bob
   src/main.c
   src/usbcmd.c
+  src/sensors.c
 )
 
 add_subdirectory(lib)
