@@ -46,7 +46,6 @@ int8_t HP203Test(hp203_t * sensor) {
     result[2] = HP203ReadBytes(sensor, buffer, 1);
 
     // Look over the results and figure out what to return.
-    printf("talking");
     sleep_ms(10);
     int i;
     // If theres an error, find the most bad error
