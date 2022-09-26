@@ -8,8 +8,8 @@ set(CMAKE_CXX_STANDARD 17)
 pico_sdk_init()
 
 set(sources src/main.c
-            src/usbcmd.c
-            src/usbcmd.h
+            src/stateMachine.c
+            src/stateMachine.h
             src/sensors.c
             src/sensors.h
             src/core1.c
@@ -17,7 +17,7 @@ set(sources src/main.c
 
 add_executable(Bob
   src/main.c
-  src/usbcmd.c
+  src/stateMachine.c
   src/sensors.c
   src/core1.c
 )
