@@ -52,11 +52,13 @@ static void pollUsb(void) {
         "\033c"     // Clear the buffer
         "\033[?25l" // Hide the cursor
         "Bob Rev 3 running build: %s %s\n"
-        "Timestamp: \n\n"
+        "Timestamp: \n"
+        "\n"
         "Accelerometer: X:        G   Y:        G   Z:        G     \n"
         "Gyroscope:     X:        dps Y:        dps Z:        dps   \n"
         "Compass:       X:            Y:            Z:              \n"
         "Barometer:     Pressure:         Pa     Temp:        °C    \n"
+        "\n"
         "Press any key to exit.\n";
 
     switch(getchar_timeout_us(0)) {
