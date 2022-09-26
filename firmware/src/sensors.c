@@ -8,6 +8,13 @@
 #include <qmi8658c.h>
 #include <stdint.h>
 #include <string.h>
+#include <math.h>
+
+// Constants defining constants is... mildly cursed, but its the nicest way
+// I could think of to set these universally
+static const enum QMIGyroScale GYRO_SCALE = QMI_GYRO_256DPS;
+static const enum QMIAccelScale ACC_SCALE = QMI_ACC_16G;
+static const enum QMCScale COMP_SCALE = QMC_SCALE_2G;
 
 static hp203_t hp203;
 static qmc_t qmc;
@@ -32,19 +39,19 @@ void configureSensors(void) {
     qmi = QMIInit(i2c_default, true);
 
     // Configure the QMI's gyro
-    QMIGyroConfig(&qmi, QMI_GYRO_125HZ, QMI_GYRO_256DPS);
+    QMIGyroConfig(&qmi, QMI_GYRO_125HZ, GYRO_SCALE);
     QMISetOption(&qmi, QMI_GYRO_ENABLE, true);
     QMISetOption(&qmi, QMI_GYRO_SNOOZE, false);
 
     // Configure the QMI's accelerometer
-    QMIAccConfig(&qmi, QMI_ACC_125HZ, QMI_ACC_16G);
+    QMIAccConfig(&qmi, QMI_ACC_125HZ, ACC_SCALE);
     QMISetOption(&qmi, QMI_ACC_ENABLE, true);
 
     // Configure the QMC
     qmcCfg.mode = QMC_CONTINUOUS;
     qmcCfg.ODR = QMC_ODR_10HZ;
     qmcCfg.OSR = QMC_OSR_256;
-    qmcCfg.scale = QMC_SCALE_2G;
+    qmcCfg.scale = COMP_SCALE;
     qmcCfg.pointerRoll = true;
     qmcCfg.enableInterrupt = false;
 
@@ -128,7 +135,7 @@ data_t pollSensors(uint8_t status) {
 
     if((status & NO_BARO) == 0) {
         sleep_until(hp203Ready);
-        i2cStatus = HP203GetPresTemp(&hp203, &barometer);
+        i2cStatus = HP203GetData(&hp203, &barometer);
         if(i2cStatus < HP203_OK) {
             status |= NO_BARO;
         } else {
@@ -139,4 +146,35 @@ data_t pollSensors(uint8_t status) {
 
     data.status = status;
     return data;
+}
+
+/* Returns the magnitude of the vector passed to it.
+ * Basically just pythagoras. */
+float magnitude(int16_t vector[3]) {
+    return sqrt(pow(vector[0], 2) + pow(vector[1], 2) + pow(vector[2], 2));
+}
+
+/* Takes a raw accelerometer reading and returns a value in G */
+float accelToG(int16_t accel) {
+    uint8_t scale = pow(2, ACC_SCALE + 1);
+    return ((float) accel / __INT16_MAX__) * (float) scale;
+}
+
+/* Takes a value in G and calculates what the QMI would read */
+int16_t gToAccel(float g) {
+    uint8_t scale = pow(2, ACC_SCALE + 1);
+    return (__INT16_MAX__/scale) * g;
+}
+
+/* Takes a raw reading from the gyro and returns a value in dps */
+float gyroToDps(int16_t gyro) {
+    uint16_t scale = pow(2, GYRO_SCALE + 4);
+    return ((float) gyro / __INT16_MAX__) * (float) scale;
+}
+
+/* Applies calibration coefficients to a magnetometer reading */
+void compCalib(int16_t * reading[3], int16_t calib[3]) {
+    *reading[0] -= calib[0];
+    *reading[1] -= calib[1];
+    *reading[2] -= calib[2];
 }
