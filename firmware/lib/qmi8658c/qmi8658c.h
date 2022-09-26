@@ -192,4 +192,5 @@ int8_t QMIGyroConfig(qmi_t * qmi, enum QMIGyroODR odr, enum QMIGyroScale scl);
  * QMI_ERROR_GENERIC for other errors */
 int8_t QMIReadData(qmi_t * qmi, struct qmi_data * data);
 
+
 #endif

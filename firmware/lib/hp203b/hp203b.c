@@ -125,7 +125,7 @@ int8_t HP203GetTemp(hp203_t * sensor, int32_t * result) {
  * HP203_OK on success,
  * HP203_ERROR_TIMEOUT if the I2C write times out
  * HP203_ERROR_GENERIC for other errors */
-int8_t HP203GetPresTemp(hp203_t * sensor, struct hp203_data * result) {
+int8_t HP203GetData(hp203_t * sensor, struct hp203_data * result) {
     uint8_t buffer[6];
     int i2cState[2];
 
