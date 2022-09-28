@@ -10,6 +10,8 @@ pico_sdk_init()
 set(sources src/main.c
             src/stateMachine.c
             src/stateMachine.h
+            src/cmd.c
+            src/cmd.h
             src/sensors.c
             src/sensors.h
             src/core1.c
@@ -17,6 +19,7 @@ set(sources src/main.c
 
 add_executable(Bob
   src/main.c
+  src/cmd.c
   src/stateMachine.c
   src/sensors.c
   src/core1.c
