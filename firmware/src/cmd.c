@@ -6,6 +6,7 @@
 
 #include "stateMachine.h"
 #include "sensors.h"
+#include "ansi.h"
 
 // How fast should updatey bits be updated?
 #define UPDATE_PERIOD 200
@@ -24,25 +25,23 @@ static void showCursor(bool visible) {
 static void debugPrint(void) {
 
     static const char prompt[] =
-        "\x1b[1;1f"
-        "\x1b[22m"
-        "Bob Rev 3 running build: %s %s\x1b[0K\n"
-        "Timestamp: %d\x1b[0K\n"
-        "\x1b[0K\n"
-        "Accelerometer: X: %6.1f G   Y: %6.1f G   Z: %6.1f G"
-        "\x1b[0K\x1b[999C\x1b[10D%s\n\x1b[22m"
-        "Gyroscope:     X: %6.1f dps Y: %6.1f dps Z: %6.1f dps"
-        "\x1b[0K\x1b[999C\x1b[10D%s\n\x1b[22m"
-        "Compass:       X: %6d     Y: %6d     Z: %6d"
-        "\x1b[0K\x1b[999C\x1b[10D%s\n\x1b[22m"
-        "Barometer:     Pressure: %7d Pa     Temp: %6.2f °C"
-        "\x1b[0K\x1b[999C\x1b[10D%s\n\x1b[22m"
-        "\x1b[0K\n"
+        MOV(1,1) NORM
+        "Bob Rev 3 running build: %s %s" CLRLN
+        "Timestamp: %d" CLRLN
+        CLRLN
+        "Accelerometer: X: %6.1f G   Y: %6.1f G   Z: %6.1f G" MOV_EC(10) "%s\n"
+        NORM
+        "Gyroscope:     X: %6.1f dps Y: %6.1f dps Z: %6.1f dps" MOV_EC(10) "%s\n"
+        NORM
+        "Compass:       X: %6d     Y: %6d     Z: %6d" MOV_EC(10) "%s\n"
+        NORM // Alacritty *really* likes to bold stuff.
+        "Barometer:     Pressure: %7d Pa     Temp: %6.2f °C" MOV_EC(10) "%s\n"
+        CLRLN NORM
         "Press any key to exit.\x1b[0J\n";
 
     // I am a sucker for pretty terminal colours. Leave me alone.
-    static const char go[] = "\x1b[34;1m [  \x1b[32;1mGO  \x1b[34;1m]\x1b[0;1m";
-    static const char nogo[] = "\x1b[34;1m [ \x1b[31;1mNOGO \x1b[34;1m]\x1b[0;1m";
+    static const char go[] = BLUE "[" GREEN "  GO" BLUE "  ]" WHITE;
+    static const char nogo[] = BLUE"[" RED " NOGO " BLUE"]" WHITE;
 
     data_t latest;
     float accel[3];

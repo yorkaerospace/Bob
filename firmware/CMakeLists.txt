@@ -12,6 +12,7 @@ set(sources src/main.c
             src/stateMachine.h
             src/cmd.c
             src/cmd.h
+            src/ansi.h
             src/sensors.c
             src/sensors.h
             src/core1.c
