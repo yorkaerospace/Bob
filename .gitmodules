@@ -1,6 +1,3 @@
 [submodule "kicad/YAR-Kicad-Libs"]
 	path = kicad/YAR-Kicad-Libs
 	url = https://github.com/yorkaerospace/YAR-Kicad-Libs.git
-[submodule "firmware/lib/littlefs-lib"]
-	path = firmware/lib/littlefs-lib
-	url = https://github.com/ProtonNumber/littlefs-lib.git
