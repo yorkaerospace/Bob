@@ -28,7 +28,7 @@ add_executable(Bob
 
 add_subdirectory(lib)
 
-target_link_libraries(Bob QMI8658C HP203B QMC5883L pico_stdlib pico_multicore hardware_i2c)
+target_link_libraries(Bob QMI8658C HP203B QMC5883L pico_stdlib pico_multicore hardware_i2c PICO_SPIFFS)
 
 pico_enable_stdio_usb(Bob 1)
 
