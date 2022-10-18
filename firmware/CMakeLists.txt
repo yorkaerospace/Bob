@@ -14,16 +14,13 @@ set(sources src/main.c
             src/cmd.h
             src/ansi.h
             src/sensors.c
-            src/sensors.h
-            src/core1.c
-            src/core1.h)
+            src/sensors.h)
 
 add_executable(Bob
   src/main.c
   src/cmd.c
   src/stateMachine.c
   src/sensors.c
-  src/core1.c
 )
 
 add_subdirectory(lib)
