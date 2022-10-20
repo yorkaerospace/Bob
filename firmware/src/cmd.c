@@ -79,7 +79,11 @@ static void debugPrint(void) {
                latest.mag[0], latest.mag[1], latest.mag[2], goStr[2],
                latest.pres, temp, goStr[3]);
 
+        if (getchar_timeout_us(0) != PICO_ERROR_TIMEOUT) {
+            break;
+        }
         sleep_ms(UPDATE_PERIOD);
+
     }
 
     clearTTY();
