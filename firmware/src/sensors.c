@@ -10,12 +10,24 @@
 #include <string.h>
 #include <math.h>
 #include "dataBuf.h"
+#include "states.h"
+
+// Pressure threshold for a launch
+#define PRES_L -100  // About 10m
+// Acceleration threshold for a launch
+#define ACCL_L (gToAccel(10))
+// Pressure threshold to detect apogee
+#define PRES_A 100  // About 10m
+// Pressure threshold for landing
+#define PRES_G 100
 
 // Constants defining constants is... mildly cursed, but its the nicest way
 // I could think of to set these universally
 static const enum QMIGyroScale GYRO_SCALE = QMI_GYRO_256DPS;
 static const enum QMIAccelScale ACC_SCALE = QMI_ACC_16G;
 static const enum QMCScale COMP_SCALE = QMC_SCALE_2G;
+
+extern volatile uint8_t state;
 
 // Sensor structs
 static hp203_t hp203;
@@ -191,4 +203,31 @@ int32_t deltaPres(size_t t) {
     uint32_t currPres = curr.pres;
     uint32_t pastPres = past.pres;
     return currPres - pastPres;
+}
+
+/* Takes a data packet and decides if state changes are needed */
+void stateDetect(data_t cur) {
+    int16_t accel_mag;
+    // Figure out if state changes are required.
+    switch (state) {
+    case GROUNDED:
+        if (deltaPres(100) < PRES_L ||
+            magnitude(cur.accel) > ACCL_L) {
+            state = ASCENDING;
+            cur.status |= LAUNCH;
+        }
+        break;
+    case ASCENDING:
+        if (deltaPres(100) > PRES_A) {
+            state = DESENDING;
+            cur.status |= APOGEE;
+        }
+        break;
+    case DESENDING:
+        if (abs(deltaPres(1000)) < PRES_G) {
+            state = GROUNDED;
+            cur.status |= LANDING;
+        }
+    }
+
 }

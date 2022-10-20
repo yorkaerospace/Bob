@@ -11,6 +11,7 @@ set(sources src/main.c
             src/cmd.c
             src/cmd.h
             src/ansi.h
+            src/states.h
             src/sensors.c
             src/sensors.h
             src/dataBuf.c
