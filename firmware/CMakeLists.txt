@@ -8,8 +8,6 @@ set(CMAKE_CXX_STANDARD 17)
 pico_sdk_init()
 
 set(sources src/main.c
-            src/stateMachine.c
-            src/stateMachine.h
             src/cmd.c
             src/cmd.h
             src/ansi.h
@@ -21,7 +19,6 @@ set(sources src/main.c
 add_executable(Bob
   src/main.c
   src/cmd.c
-  src/stateMachine.c
   src/sensors.c
   src/dataBuf.c
 )
