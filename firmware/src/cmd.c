@@ -4,8 +4,7 @@
 #include "pico/stdlib.h"
 #include "pico/bootrom.h"
 
-#include "stateMachine.h"
-#include "sensors.h"
+#include "dataBuf.h"
 #include "ansi.h"
 
 // How fast should updatey bits be updated?
@@ -56,7 +55,7 @@ static void debugPrint(void) {
 
     while (true) {
 
-        latest = getLatest();
+        dataHead(&latest);
 
         accel[0] = accelToG(latest.accel[0]);
         accel[1] = accelToG(latest.accel[1]);

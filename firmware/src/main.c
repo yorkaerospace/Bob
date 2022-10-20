@@ -6,9 +6,10 @@
 
 #include "stateMachine.h"
 #include "sensors.h"
+#include "dataBuf.h"
 
 void core1Entry(void) {
-    data_t * data_p;
+    data_t d;
     uint8_t status;
     absolute_time_t nextPoll;
 
@@ -17,11 +18,10 @@ void core1Entry(void) {
 
     while (true) {
         nextPoll = make_timeout_time_ms(10);
-        data_p = malloc(sizeof(data_t));
-        *data_p = pollSensors(status);
+        d = pollSensors(status);
+        dataPush(d);
         sleep_until(nextPoll);
-        multicore_fifo_push_timeout_us(data_p, 500);
-        status = data_p->status;
+        status = d.status;
     }
 }
 
@@ -29,11 +29,6 @@ int main() {
     uint8_t status;
 
     stdio_init_all();
-
-    multicore_fifo_clear_irq();
-    irq_set_exclusive_handler(SIO_IRQ_PROC0, fifoIRQ);
-
-    irq_set_enabled(SIO_IRQ_PROC0, true);
 
     multicore_launch_core1(core1Entry);
 

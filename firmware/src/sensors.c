@@ -9,6 +9,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <math.h>
+#include "dataBuf.h"
 
 // Constants defining constants is... mildly cursed, but its the nicest way
 // I could think of to set these universally
@@ -16,9 +17,11 @@ static const enum QMIGyroScale GYRO_SCALE = QMI_GYRO_256DPS;
 static const enum QMIAccelScale ACC_SCALE = QMI_ACC_16G;
 static const enum QMCScale COMP_SCALE = QMC_SCALE_2G;
 
+// Sensor structs
 static hp203_t hp203;
 static qmc_t qmc;
 static qmi_t qmi;
+
 
 /* Initialises the sensors and the associated i2c bus */
 void configureSensors(void) {
@@ -174,7 +177,18 @@ float gyroToDps(int16_t gyro) {
 
 /* Applies calibration coefficients to a magnetometer reading */
 void compCalib(int16_t * reading[3], int16_t calib[3]) {
-    *reading[0] -= calib[0];
-    *reading[1] -= calib[1];
-    *reading[2] -= calib[2];
+    reading[0] -= calib[0];
+    reading[1] -= calib[1];
+    reading[2] -= calib[2];
+}
+
+/* Finds the difference in pressure between the most recent
+ * data packet and the one that was t samples ago . */
+int32_t deltaPres(size_t t) {
+    data_t curr, past;
+    dataHead(&curr);
+    dataRel(&past, t);
+    uint32_t currPres = curr.pres;
+    uint32_t pastPres = past.pres;
+    return currPres - pastPres;
 }
