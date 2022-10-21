@@ -6,6 +6,7 @@
 
 #include "dataBuf.h"
 #include "ansi.h"
+#include "logger.h"
 
 // How fast should updatey bits be updated?
 #define UPDATE_PERIOD 200
@@ -90,6 +91,16 @@ static void debugPrint(void) {
     showCursor(true);
 }
 
+static void manualLogger(void) {
+    newLog();
+    printf("Press any key to exit logging\n");
+    while(getchar_timeout_us(0) != PICO_ERROR_TIMEOUT) {
+        logData();
+    }
+    closeLog();
+}
+
+
 /* Polls stdin and interprets what it gets. */
 void pollUsb(void) {
     static const char helpText[] =
@@ -98,7 +109,9 @@ void pollUsb(void) {
         "b to enter bootsel mode\n"
         "c to clear this tty\n"
         "d to show the debug prompt\n"
-        "h to display this help text\n";
+        "h to display this help text\n"
+        "l to start manual logging\n"
+        "r to read files\n";
 
     switch(getchar_timeout_us(0)) {
     case PICO_ERROR_TIMEOUT:         // If there is no char, just break.
@@ -115,6 +128,12 @@ void pollUsb(void) {
         break;
     case 'h':
         printf(helpText, __TIME__, __DATE__);
+        break;
+    case 'l':
+        manualLogger();
+        break;
+    case 'r':
+        dumpLogs();
         break;
     default:
         printf("?\n");

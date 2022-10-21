@@ -5,12 +5,50 @@
 #include "hardware/irq.h"
 #include "pico/multicore.h"
 
+
+#include "spiffs/xip.h"
 #include "sensors.h"
 #include "cmd.h"
 #include "dataBuf.h"
 #include "states.h"
 
 volatile uint8_t state = GROUNDED;
+spiffs fs;
+
+// Pressure threshold for a launch
+#define PRES_L -100  // About 10m
+// Acceleration threshold for a launch
+#define ACCL_L (gToAccel(10))
+// Pressure threshold to detect apogee
+#define PRES_A 100  // About 10m
+// Pressure threshold for landing
+#define PRES_G 100
+
+/* Takes a data packet and decides if state changes are needed */
+void stateDetect(data_t cur) {
+    int16_t accel_mag;
+    // Figure out if state changes are required.
+    switch (state) {
+    case GROUNDED:
+        if (deltaPres(100) < PRES_L ||
+            magnitude(cur.accel) > ACCL_L) {
+            state = ASCENDING;
+            cur.status |= LAUNCH;
+        }
+        break;
+    case ASCENDING:
+        if (deltaPres(100) > PRES_A) {
+            state = DESENDING;
+            cur.status |= APOGEE;
+        }
+        break;
+    case DESENDING:
+        if (abs(deltaPres(1000)) < PRES_G) {
+            state = GROUNDED;
+            cur.status |= LANDING;
+        }
+    }
+}
 
 /* The code that runs on core 1 */
 void core1Entry(void) {
@@ -35,7 +73,11 @@ int main() {
 
     stdio_init_all();
 
+    sleep_ms(10000);
+    printf("Hello world!");
     multicore_launch_core1(core1Entry);
+
+    XIPQuickMount(&fs);
 
     while (true) {
         switch (state) {
