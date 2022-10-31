@@ -77,7 +77,7 @@ int main() {
     printf("Hello world!");
     multicore_launch_core1(core1Entry);
 
-    XIPQuickMount(&fs);
+    XIPQuickMount(&fs, 4*1024*1024, true);
 
     while (true) {
         switch (state) {
