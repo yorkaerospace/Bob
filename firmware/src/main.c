@@ -6,14 +6,12 @@
 #include "pico/multicore.h"
 
 
-#include "spiffs/xip.h"
 #include "sensors.h"
 #include "cmd.h"
 #include "dataBuf.h"
 #include "states.h"
 
 volatile uint8_t state = GROUNDED;
-spiffs fs;
 
 // Pressure threshold for a launch
 #define PRES_L -100  // About 10m
@@ -58,6 +56,7 @@ void core1Entry(void) {
 
     configureSensors();
     status = testSensors();
+    multicore_lockout_victim_init();
 
     while (true) {
         nextPoll = make_timeout_time_ms(10);
@@ -73,11 +72,7 @@ int main() {
 
     stdio_init_all();
 
-    sleep_ms(10000);
-    printf("Hello world!");
     multicore_launch_core1(core1Entry);
-
-    XIPQuickMount(&fs, 4*1024*1024, true);
 
     while (true) {
         switch (state) {

@@ -11,7 +11,6 @@
 
 #include "dataBuf.h"
 
-
 // Simple circular buffer.
 static volatile data_t dataBuf[BUF_SIZE];
 static volatile uint16_t tail = 0;
@@ -56,8 +55,8 @@ int8_t dataPush(data_t d){
 /* Returns the amount of data in the buffer */
 uint16_t dataSize(void) {
     return head >= tail ?
-           head - tail :
-           BUF_SIZE - (tail - head);
+           head - tail - 1:
+           BUF_SIZE - (tail - head) - 1;
 }
 
 /* Pops a piece of data from the end of the buffer
@@ -66,8 +65,11 @@ uint16_t dataSize(void) {
  *  0 if successful
  * -1 if no data is in the buffer */
 int8_t dataPop(data_t * ptr) {
+    printf("Entering mutex\n");
     mutex_enter_blocking(&mtx);
-    if(head == tail + 1) {
+    printf("%d, %d \n", head, tail);
+    if(head == incIndex(tail)) {
+        mutex_exit(&mtx);
         return -1;
     } else {
         *ptr = dataBuf[tail];

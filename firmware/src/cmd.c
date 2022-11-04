@@ -92,12 +92,30 @@ static void debugPrint(void) {
 }
 
 static void manualLogger(void) {
-    newLog();
-    printf("Press any key to exit logging\n");
-    while(getchar_timeout_us(0) != PICO_ERROR_TIMEOUT) {
-        logData();
+    int n = 0;
+    printf("Press any key to stop logging. \n");
+    while(getchar_timeout_us(0) == PICO_ERROR_TIMEOUT) {
+        n = n + writeAll();
+        //printf( NORM "Structs written: %d\n", n);
     }
-    closeLog();
+    printf("\nExiting Logging!\n");
+}
+
+static void clearPrompt(void) {
+    printf(NORM
+           "Are you sure you wish to clear the flash? "
+           "["GREEN "Y" WHITE "/" RED "N" WHITE "]\n"
+           NORM);
+    switch(getchar_timeout_us(30000000)){
+    case PICO_ERROR_TIMEOUT:
+        printf("Timed out due to lack of response, please try again\n");
+        break;
+    case 'y':
+        printf("Clearing flash. (This may take a while) \n");
+        clearData();
+        printf("Done!\n");
+        break;
+    }
 }
 
 
@@ -107,7 +125,7 @@ void pollUsb(void) {
         "Bob Rev 3 running build: %s %s\n"
         "Press:\n"
         "b to enter bootsel mode\n"
-        "c to clear this tty\n"
+        "c to clear the contents of the flash\n"
         "d to show the debug prompt\n"
         "h to display this help text\n"
         "l to start manual logging\n"
@@ -121,7 +139,7 @@ void pollUsb(void) {
         reset_usb_boot(0,0);
         break;
     case 'c':
-        clearTTY();
+        clearPrompt();
         break;
     case 'd':
         debugPrint();

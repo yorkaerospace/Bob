@@ -32,14 +32,6 @@
 #define PICO_FLASH_SIZE_BYTES (64 * 1024 * 1024)
 #endif
 
-#ifndef XIP_FS_SIZE
-#define XIP_FS_SIZE (7 * 8 * 1024 * 1024)
-#endif
-
-#ifndef XIP_INTERRUPTS
-#define XIP_INTERRUPTS 1
-#endif
-
 // Buzzer
 #define BOB_BUZZER 7
 
