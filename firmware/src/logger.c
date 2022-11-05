@@ -40,6 +40,8 @@ static page buf;
 
 static uint32_t writeIndex = 0;
 
+extern mutex_t flashMtx;
+
 
 /* Clears data from the flash.
  * Has no error checking because apparently the SDK thinks we dont need that. */
@@ -59,19 +61,19 @@ uint8_t flushData(void) {
     page * cur = dataStart + writeIndex;
     uint32_t ints;
 
-    uint64_t t1, t2;
-
+    printf("Reading from flash\n");
     // Skip past all the written blocks
     while(cur->contents.metadata != 0xFF) {
         writeIndex++;
         cur++;
     }
     printf("Writing to %X\n", cur);
+    mutex_enter_blocking(&flashMtx);
+    printf("Mutex claimed\n");
     ints = save_and_disable_interrupts();
-    multicore_lockout_start_blocking();
-    //flash_range_program(PROG_RESERVED + 256 * writeIndex, &buf, 256);
-    multicore_lockout_end_blocking();
+    flash_range_program(PROG_RESERVED + 256 * writeIndex, &buf, 256);
     restore_interrupts(ints);
+    mutex_exit(&flashMtx);
     buf.contents.metadata = 0;
     return cur->contents.metadata;
 }

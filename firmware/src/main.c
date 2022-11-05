@@ -4,6 +4,7 @@
 #include "hardware/i2c.h"
 #include "hardware/irq.h"
 #include "pico/multicore.h"
+#include "pico/bootrom.h"
 
 
 #include "sensors.h"
@@ -12,6 +13,7 @@
 #include "states.h"
 
 volatile uint8_t state = GROUNDED;
+mutex_t flashMtx;
 
 // Pressure threshold for a launch
 #define PRES_L -100  // About 10m
@@ -56,21 +58,25 @@ void core1Entry(void) {
 
     configureSensors();
     status = testSensors();
-    multicore_lockout_victim_init();
 
     while (true) {
+        mutex_enter_blocking(&flashMtx);
         nextPoll = make_timeout_time_ms(10);
         d = pollSensors(status);
         dataPush(d);
         stateDetect(d);
-        sleep_until(nextPoll);
         status = d.status;
+        mutex_exit(&flashMtx);
+        sleep_until(nextPoll);
+
     }
 }
 
 int main() {
 
     stdio_init_all();
+
+    mutex_init(&flashMtx);
 
     multicore_launch_core1(core1Entry);
 
