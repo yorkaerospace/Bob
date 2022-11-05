@@ -6,6 +6,7 @@
 
 #include "dataBuf.h"
 #include "ansi.h"
+#include "logger.h"
 
 // How fast should updatey bits be updated?
 #define UPDATE_PERIOD 200
@@ -79,12 +80,44 @@ static void debugPrint(void) {
                latest.mag[0], latest.mag[1], latest.mag[2], goStr[2],
                latest.pres, temp, goStr[3]);
 
+        if (getchar_timeout_us(0) != PICO_ERROR_TIMEOUT) {
+            break;
+        }
         sleep_ms(UPDATE_PERIOD);
+
     }
 
     clearTTY();
     showCursor(true);
 }
+
+static void manualLogger(void) {
+    int n = 0;
+    printf("Press any key to stop logging. \n");
+    while(getchar_timeout_us(0) == PICO_ERROR_TIMEOUT) {
+        n = n + writeAll();
+        //printf( NORM "Structs written: %d\n", n);
+    }
+    printf("\nExiting Logging!\n");
+}
+
+static void clearPrompt(void) {
+    printf(NORM
+           "Are you sure you wish to clear the flash? "
+           "["GREEN "Y" WHITE "/" RED "N" WHITE "]\n"
+           NORM);
+    switch(getchar_timeout_us(30000000)){
+    case PICO_ERROR_TIMEOUT:
+        printf("Timed out due to lack of response, please try again\n");
+        break;
+    case 'y':
+        printf("Clearing flash. (This may take a while) \n");
+        clearData();
+        printf("Done!\n");
+        break;
+    }
+}
+
 
 /* Polls stdin and interprets what it gets. */
 void pollUsb(void) {
@@ -92,9 +125,11 @@ void pollUsb(void) {
         "Bob Rev 3 running build: %s %s\n"
         "Press:\n"
         "b to enter bootsel mode\n"
-        "c to clear this tty\n"
+        "c to clear the contents of the flash\n"
         "d to show the debug prompt\n"
-        "h to display this help text\n";
+        "h to display this help text\n"
+        "l to start manual logging\n"
+        "r to read files\n";
 
     switch(getchar_timeout_us(0)) {
     case PICO_ERROR_TIMEOUT:         // If there is no char, just break.
@@ -104,13 +139,19 @@ void pollUsb(void) {
         reset_usb_boot(0,0);
         break;
     case 'c':
-        clearTTY();
+        clearPrompt();
         break;
     case 'd':
         debugPrint();
         break;
     case 'h':
         printf(helpText, __TIME__, __DATE__);
+        break;
+    case 'l':
+        manualLogger();
+        break;
+    case 'r':
+        dumpLogs();
         break;
     default:
         printf("?\n");

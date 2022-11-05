@@ -6,6 +6,7 @@
  * dependent on the configuration of the sensors. */
 
 #include <stdint.h>
+#include <stdlib.h>
 
 typedef struct {
     uint32_t pres;    // Pressure in pascals
@@ -64,4 +65,7 @@ float gyroToDps(int16_t gyro);
 /* Applies calibration coefficients to a magnetometer reading */
 void compCalib(int16_t * reading[3], int16_t calib[3]);
 
+/* Finds the difference in pressure between the most recent
+ * data packet and the one that was t samples ago . */
+int32_t deltaPres(size_t t);
 #endif

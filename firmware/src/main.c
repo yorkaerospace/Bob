@@ -1,12 +1,19 @@
 #include <stdio.h>
+
 #include "pico/stdlib.h"
 #include "hardware/i2c.h"
 #include "hardware/irq.h"
 #include "pico/multicore.h"
+#include "pico/bootrom.h"
+
 
 #include "sensors.h"
 #include "cmd.h"
 #include "dataBuf.h"
+#include "states.h"
+
+volatile uint8_t state = GROUNDED;
+mutex_t flashMtx;
 
 // Pressure threshold for a launch
 #define PRES_L -100  // About 10m
@@ -16,15 +23,6 @@
 #define PRES_A 100  // About 10m
 // Pressure threshold for landing
 #define PRES_G 100
-
-enum states {
-    CONNECTED, // If system is connected over usb
-    GROUNDED,  // If system is not connected, but not in flight
-    ASCENDING,
-    DESENDING
-};
-
-volatile uint8_t state = GROUNDED;
 
 /* Takes a data packet and decides if state changes are needed */
 void stateDetect(data_t cur) {
@@ -50,7 +48,6 @@ void stateDetect(data_t cur) {
             cur.status |= LANDING;
         }
     }
-
 }
 
 /* The code that runs on core 1 */
@@ -63,12 +60,15 @@ void core1Entry(void) {
     status = testSensors();
 
     while (true) {
+        mutex_enter_blocking(&flashMtx);
         nextPoll = make_timeout_time_ms(10);
         d = pollSensors(status);
         dataPush(d);
-        stateDetect(d);
-        sleep_until(nextPoll);
+        //stateDetect(d);
         status = d.status;
+        mutex_exit(&flashMtx);
+        sleep_until(nextPoll);
+
     }
 }
 
@@ -76,26 +76,36 @@ int main() {
 
     stdio_init_all();
 
+    mutex_init(&flashMtx);
+
     multicore_launch_core1(core1Entry);
 
-    while (true) {
-        switch (state) {
-        case CONNECTED:
-            if (!stdio_usb_connected()) {
-                state = GROUNDED;
-            } else {
-                pollUsb();
-            }
-            break;
-        case GROUNDED:
-            if (stdio_usb_connected()) {
-                state = CONNECTED;
-            }
-            break;
-        case ASCENDING:
-            break;
-        case DESENDING:
-            break;
+    while(true) {
+        if(stdio_usb_connected()) {
+            pollUsb();
+        } else {
+            writeAll();
         }
     }
+
+    /* while (true) { */
+    /*     switch (state) { */
+    /*     case CONNECTED: */
+    /*         if (!stdio_usb_connected()) { */
+    /*             state = GROUNDED; */
+    /*         } else { */
+    /*             pollUsb(); */
+    /*         } */
+    /*         break; */
+    /*     case GROUNDED: */
+    /*         if (stdio_usb_connected()) { */
+    /*             state = CONNECTED; */
+    /*         } */
+    /*         break; */
+    /*     case ASCENDING: */
+    /*         break; */
+    /*     case DESENDING: */
+    /*         break; */
+    /*     } */
+    /* } */
 }

@@ -10,12 +10,15 @@
 #include <string.h>
 #include <math.h>
 #include "dataBuf.h"
+#include "states.h"
 
 // Constants defining constants is... mildly cursed, but its the nicest way
 // I could think of to set these universally
 static const enum QMIGyroScale GYRO_SCALE = QMI_GYRO_256DPS;
 static const enum QMIAccelScale ACC_SCALE = QMI_ACC_16G;
 static const enum QMCScale COMP_SCALE = QMC_SCALE_2G;
+
+extern volatile uint8_t state;
 
 // Sensor structs
 static hp203_t hp203;

@@ -11,13 +11,12 @@
 
 #include "dataBuf.h"
 
-
 // Simple circular buffer.
 static volatile data_t dataBuf[BUF_SIZE];
 static volatile uint16_t tail = 0;
 static volatile uint16_t head = 0;
 
-auto_init_mutex(mtx);
+auto_init_mutex(bufMtx);
 
 /* Increments an index with looping */
 static inline uint16_t incIndex(uint16_t i) {
@@ -36,7 +35,7 @@ static inline uint16_t incIndex(uint16_t i) {
  *  1 if data has been overwritten */
 int8_t dataPush(data_t d){
     int8_t res;
-    if(mutex_enter_timeout_ms(&mtx, BUF_TIMEOUT)) {
+    if(mutex_enter_timeout_ms(&bufMtx, BUF_TIMEOUT)) {
         head = incIndex(head);
         dataBuf[head] = d;
         // Increment tail if we've overwritten data
@@ -46,7 +45,7 @@ int8_t dataPush(data_t d){
         } else {
             res = 0;
         }
-        mutex_exit(&mtx);
+        mutex_exit(&bufMtx);
         return res;
     } else {
         return -1;
@@ -56,8 +55,8 @@ int8_t dataPush(data_t d){
 /* Returns the amount of data in the buffer */
 uint16_t dataSize(void) {
     return head >= tail ?
-           head - tail :
-           BUF_SIZE - (tail - head);
+           head - tail - 1:
+           BUF_SIZE - (tail - head) - 1;
 }
 
 /* Pops a piece of data from the end of the buffer
@@ -66,13 +65,16 @@ uint16_t dataSize(void) {
  *  0 if successful
  * -1 if no data is in the buffer */
 int8_t dataPop(data_t * ptr) {
-    mutex_enter_blocking(&mtx);
-    if(head == tail + 1) {
+    printf("Entering mutex\n");
+    mutex_enter_blocking(&bufMtx);
+    printf("%d, %d \n", head, tail);
+    if(head == incIndex(tail)) {
+        mutex_exit(&bufMtx);
         return -1;
     } else {
         *ptr = dataBuf[tail];
         tail = incIndex(tail);
-        mutex_exit(&mtx);
+        mutex_exit(&bufMtx);
         return 0;
     }
 }
@@ -80,14 +82,14 @@ int8_t dataPop(data_t * ptr) {
 /* Gets the data at the head of the buffer
  * Blocks indefinitely. */
 void dataHead(data_t * ptr) {
-    mutex_enter_blocking(&mtx);
+    mutex_enter_blocking(&bufMtx);
     *ptr = dataBuf[head];
-    mutex_exit(&mtx);
+    mutex_exit(&bufMtx);
 }
 
 /* Gets the data that was offset samples ago */
 void dataRel(data_t * ptr, size_t offset) {
-    mutex_enter_blocking(&mtx);
+    mutex_enter_blocking(&bufMtx);
     *ptr = dataBuf[(head - offset) % BUF_SIZE];
-    mutex_exit(&mtx);
+    mutex_exit(&bufMtx);
 }

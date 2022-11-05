@@ -1,5 +1,5 @@
-/* Header file containing bob-specific constants 
- * This overrides a lot of things that the SDK sets by default 
+/* Header file containing bob-specific constants
+ * This overrides a lot of things that the SDK sets by default
  * You dont have to include this in any code you write; the SDK
  * should include it by default. */
 #ifndef BOB_H

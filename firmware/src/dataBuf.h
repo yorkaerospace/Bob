@@ -11,7 +11,7 @@
 #include "sensors.h"
 
 // A 10 second buffer should be ~30 kB
-#define BUF_SIZE 10 * 100
+#define BUF_SIZE (10 * 100)
 #define BUF_TIMEOUT 1
 
 /* Pushes a piece of data into the buffer.
