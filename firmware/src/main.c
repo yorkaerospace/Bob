@@ -80,6 +80,8 @@ int main() {
 
     multicore_launch_core1(core1Entry);
 
+    sleep_ms(1000);
+
     while(true) {
         if(stdio_usb_connected()) {
             pollUsb();
