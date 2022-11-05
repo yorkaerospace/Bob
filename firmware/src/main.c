@@ -64,7 +64,7 @@ void core1Entry(void) {
         nextPoll = make_timeout_time_ms(10);
         d = pollSensors(status);
         dataPush(d);
-        stateDetect(d);
+        //stateDetect(d);
         status = d.status;
         mutex_exit(&flashMtx);
         sleep_until(nextPoll);
@@ -80,24 +80,32 @@ int main() {
 
     multicore_launch_core1(core1Entry);
 
-    while (true) {
-        switch (state) {
-        case CONNECTED:
-            if (!stdio_usb_connected()) {
-                state = GROUNDED;
-            } else {
-                pollUsb();
-            }
-            break;
-        case GROUNDED:
-            if (stdio_usb_connected()) {
-                state = CONNECTED;
-            }
-            break;
-        case ASCENDING:
-            break;
-        case DESENDING:
-            break;
+    while(true) {
+        if(stdio_usb_connected()) {
+            pollUsb();
+        } else {
+            writeAll();
         }
     }
+
+    /* while (true) { */
+    /*     switch (state) { */
+    /*     case CONNECTED: */
+    /*         if (!stdio_usb_connected()) { */
+    /*             state = GROUNDED; */
+    /*         } else { */
+    /*             pollUsb(); */
+    /*         } */
+    /*         break; */
+    /*     case GROUNDED: */
+    /*         if (stdio_usb_connected()) { */
+    /*             state = CONNECTED; */
+    /*         } */
+    /*         break; */
+    /*     case ASCENDING: */
+    /*         break; */
+    /*     case DESENDING: */
+    /*         break; */
+    /*     } */
+    /* } */
 }
