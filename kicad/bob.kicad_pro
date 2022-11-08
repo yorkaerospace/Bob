@@ -39,12 +39,12 @@
         },
         "silk_line_width": 0.15,
         "silk_text_italic": false,
-        "silk_text_size_h": 0.5,
-        "silk_text_size_v": 0.5,
+        "silk_text_size_h": 0.75,
+        "silk_text_size_v": 0.75,
         "silk_text_thickness": 0.15,
         "silk_text_upright": false,
         "zones": {
-          "45_degree_only": false,
+          "45_degree_only": true,
           "min_clearance": 0.25
         }
       },
@@ -55,7 +55,9 @@
           "width": 0.0
         }
       ],
-      "drc_exclusions": [],
+      "drc_exclusions": [
+        "clearance|44286385|35227957|2eb3950a-cef1-475f-84cd-ddfb06d90729|469e153e-2e17-4708-b93e-e5b230836722"
+      ],
       "meta": {
         "version": 2
       },
@@ -120,6 +122,7 @@
       },
       "track_widths": [
         0.0,
+        0.2,
         0.5
       ],
       "via_dimensions": [
@@ -391,6 +394,28 @@
       },
       {
         "bus_width": 12.0,
+        "clearance": 0.2,
+        "diff_pair_gap": 0.25,
+        "diff_pair_via_gap": 0.25,
+        "diff_pair_width": 0.2,
+        "line_style": 0,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "name": "Pyro",
+        "nets": [
+          "ARM",
+          "Fire 1",
+          "Fire 2"
+        ],
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "track_width": 0.5,
+        "via_diameter": 0.8,
+        "via_drill": 0.4,
+        "wire_width": 6.0
+      },
+      {
+        "bus_width": 12.0,
         "clearance": 0.15,
         "diff_pair_gap": 0.15,
         "diff_pair_via_gap": 0.25,
@@ -469,6 +494,14 @@
     [
       "febb7d9c-f8af-428a-b455-1415daa5c3f8",
       ""
+    ],
+    [
+      "fd9f7e93-7f62-4ad6-9840-ded72998171a",
+      "Pyro 1"
+    ],
+    [
+      "5b8f7e4c-1392-4e5a-9331-94994b368173",
+      "Pyro 2"
     ]
   ],
   "text_variables": {}

@@ -2,4 +2,5 @@
   (lib (name "Logos")(type "KiCad")(uri "${KIPRJMOD}/Logos.pretty")(options "")(descr ""))
   (lib (name "YAR_MCU")(type "KiCad")(uri "${KIPRJMOD}/YAR-Kicad-Libs/Footprints/YAR_MCU.pretty")(options "")(descr ""))
   (lib (name "YAR_Sensors")(type "KiCad")(uri "${KIPRJMOD}/YAR-Kicad-Libs/Footprints/YAR_Sensors.pretty")(options "")(descr ""))
+  (lib (name "YAR_Connectors")(type "KiCad")(uri "${KIPRJMOD}/YAR-Kicad-Libs/Footprints/YAR_Connectors.pretty")(options "")(descr ""))
 )
