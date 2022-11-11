@@ -33,7 +33,7 @@ void configureSensors(void) {
     int8_t result;  // Stores the results of tests until we need them.
 
     // Configure the i2c bus.
-    i2c_init(i2c_default, 400*1000);
+    i2c_init(i2c_default, 100*1000);
     gpio_set_function(16, GPIO_FUNC_I2C);
     gpio_set_function(17, GPIO_FUNC_I2C);
     gpio_pull_up(16);
