@@ -67,6 +67,11 @@ uint8_t flushData(void) {
         writeIndex++;
         cur++;
     }
+
+    if((int) cur >= PICO_FLASH_SIZE_BYTES + XIP_BASE - 256) {
+        return -1;
+    }
+
     printf("Writing to %X\n", cur);
     mutex_enter_blocking(&flashMtx);
     printf("Mutex claimed\n");
@@ -122,7 +127,8 @@ void dumpLogs(void) {
 
     printf("Timestamp, Flags, AX, AY, AZ, GX, GY, GZ, CX, CY, CZ, P, T\n");
 
-    while(cur->contents.metadata != 0xFF) {
+    while(cur->contents.metadata != 0xFF &&
+         (int)cur >= PICO_FLASH_SIZE_BYTES + XIP_BASE) {
         for(j = 0; j < cur->contents.metadata; j++) {
             latest = cur->contents.data[j];
 
