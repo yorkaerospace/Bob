@@ -27,13 +27,14 @@ static qmi_t qmi;
 
 
 /* Initialises the sensors and the associated i2c bus */
-void configureSensors(void) {
+void configureSensors(void)
+{
     struct qmc_cfg qmcCfg;
     uint8_t status; // System status
     int8_t result;  // Stores the results of tests until we need them.
 
     // Configure the i2c bus.
-    i2c_init(i2c_default, 100*1000);
+    i2c_init(i2c_default, 100 * 1000);
     gpio_set_function(16, GPIO_FUNC_I2C);
     gpio_set_function(17, GPIO_FUNC_I2C);
     gpio_pull_up(16);
@@ -65,15 +66,16 @@ void configureSensors(void) {
 
 }
 
-/* Tests all the sensors and returns a bitfield showing which sensors
- * are active.
- * Bit | Sensor
- *  0  | HP203B   Barometer
- *  1  | QMI8658C Gyroscope
- *  2  | QMI8658C Accelerometer
- *  3  | QMC5883L Compass
- * Bit set high indicates a faulty sensor. */
-uint8_t testSensors(void) {
+/*  Tests all the sensors and returns a bitfield showing which sensors
+    are active.
+    Bit | Sensor
+    0  | HP203B   Barometer
+    1  | QMI8658C Gyroscope
+    2  | QMI8658C Accelerometer
+    3  | QMC5883L Compass
+    Bit set high indicates a faulty sensor. */
+uint8_t testSensors(void)
+{
     uint8_t result;
     int8_t status;
 
@@ -83,15 +85,19 @@ uint8_t testSensors(void) {
 
     status = QMITest(&qmi);
 
-    switch (status) {
+    switch(status)
+    {
     case QMI_OK:
         break;
+
     case QMI_NO_ACCEL:
         result |= NO_ACCL;
         break;
+
     case QMI_NO_GYRO:
         result |= NO_GYRO;
         break;
+
     default:
         result |= NO_ACCL | NO_GYRO;
     }
@@ -103,9 +109,10 @@ uint8_t testSensors(void) {
     return result;
 }
 
-/* Polls the sensors and returns a data struct
- * Takes a bitfield showing the status of all sensors. */
-data_t pollSensors(uint8_t status) {
+/*  Polls the sensors and returns a data struct
+    Takes a bitfield showing the status of all sensors. */
+data_t pollSensors(uint8_t status)
+{
     data_t data;
     int32_t i2cStatus;
     absolute_time_t hp203Ready;
@@ -115,36 +122,47 @@ data_t pollSensors(uint8_t status) {
 
     data.time = to_ms_since_boot(get_absolute_time());
 
-    if((status & NO_BARO) == 0) {
+    if((status & NO_BARO) == 0)
+    {
         i2cStatus = HP203Measure(&hp203, HP203_PRES_TEMP, HP203_OSR_256);
-        if(i2cStatus < HP203_OK) {    // TODO: Retest sensors when appropriate.
+
+        if(i2cStatus < HP203_OK)      // TODO: Retest sensors when appropriate.
             status |= NO_BARO;
-        } else {
+
+        else
             hp203Ready = make_timeout_time_us(i2cStatus);
-        }
     }
 
-    if((status & NO_ACCL) == 0 || (status & NO_GYRO) == 0) {
+    if((status & NO_ACCL) == 0 || (status & NO_GYRO) == 0)
+    {
         i2cStatus = QMIReadData(&qmi, &imu);
-        if(i2cStatus != QMI_OK) {
+
+        if(i2cStatus != QMI_OK)
             status |= NO_ACCL | NO_GYRO;
-        } else {
+
+        else
+        {
             memcpy(data.accel, imu.accel, 6);
             memcpy(data.gyro, imu.gyro, 6);
         }
     }
 
-    if((status & NO_COMP) == 0) {
+    if((status & NO_COMP) == 0)
+    {
         i2cStatus = QMCGetMag(&qmc, data.mag);
         status |= i2cStatus != QMC_OK ? 0 : NO_COMP;
     }
 
-    if((status & NO_BARO) == 0) {
+    if((status & NO_BARO) == 0)
+    {
         sleep_until(hp203Ready);
         i2cStatus = HP203GetData(&hp203, &barometer);
-        if(i2cStatus < HP203_OK) {
+
+        if(i2cStatus < HP203_OK)
             status |= NO_BARO;
-        } else {
+
+        else
+        {
             data.pres = barometer.pres;
             data.temp = barometer.temp;
         }
@@ -154,40 +172,46 @@ data_t pollSensors(uint8_t status) {
     return data;
 }
 
-/* Returns the magnitude of the vector passed to it.
- * Basically just pythagoras. */
-float magnitude(int16_t vector[3]) {
+/*  Returns the magnitude of the vector passed to it.
+    Basically just pythagoras. */
+float magnitude(int16_t vector[3])
+{
     return sqrt(pow(vector[0], 2) + pow(vector[1], 2) + pow(vector[2], 2));
 }
 
 /* Takes a raw accelerometer reading and returns a value in G */
-float accelToG(int16_t accel) {
+float accelToG(int16_t accel)
+{
     uint8_t scale = pow(2, ACC_SCALE + 1);
     return ((float) accel / __INT16_MAX__) * (float) scale;
 }
 
 /* Takes a value in G and calculates what the QMI would read */
-int16_t gToAccel(float g) {
+int16_t gToAccel(float g)
+{
     uint8_t scale = pow(2, ACC_SCALE + 1);
-    return (__INT16_MAX__/scale) * g;
+    return (__INT16_MAX__ / scale) * g;
 }
 
 /* Takes a raw reading from the gyro and returns a value in dps */
-float gyroToDps(int16_t gyro) {
+float gyroToDps(int16_t gyro)
+{
     uint16_t scale = pow(2, GYRO_SCALE + 4);
     return ((float) gyro / __INT16_MAX__) * (float) scale;
 }
 
 /* Applies calibration coefficients to a magnetometer reading */
-void compCalib(int16_t * reading[3], int16_t calib[3]) {
+void compCalib(int16_t *reading[3], int16_t calib[3])
+{
     reading[0] -= calib[0];
     reading[1] -= calib[1];
     reading[2] -= calib[2];
 }
 
-/* Finds the difference in pressure between the most recent
- * data packet and the one that was t samples ago . */
-int32_t deltaPres(size_t t) {
+/*  Finds the difference in pressure between the most recent
+    data packet and the one that was t samples ago . */
+int32_t deltaPres(size_t t)
+{
     data_t curr, past;
     dataHead(&curr);
     dataRel(&past, t);

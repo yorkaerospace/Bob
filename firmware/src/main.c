@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "pico/stdlib.h"
+#include <pico/stdlib.h>
 #include "hardware/i2c.h"
 #include "hardware/irq.h"
 #include "pico/multicore.h"
@@ -25,25 +25,35 @@ mutex_t flashMtx;
 #define PRES_G 100
 
 /* Takes a data packet and decides if state changes are needed */
-void stateDetect(data_t cur) {
+void stateDetect(data_t cur)
+{
     int16_t accel_mag;
+
     // Figure out if state changes are required.
-    switch (state) {
+    switch(state)
+    {
     case GROUNDED:
-        if (deltaPres(100) < PRES_L ||
-            magnitude(cur.accel) > ACCL_L) {
+        if(deltaPres(100) < PRES_L ||
+                magnitude(cur.accel) > ACCL_L)
+        {
             state = ASCENDING;
             cur.status |= LAUNCH;
         }
+
         break;
+
     case ASCENDING:
-        if (deltaPres(100) > PRES_A) {
+        if(deltaPres(100) > PRES_A)
+        {
             state = DESENDING;
             cur.status |= APOGEE;
         }
+
         break;
+
     case DESENDING:
-        if (abs(deltaPres(1000)) < PRES_G) {
+        if(abs(deltaPres(1000)) < PRES_G)
+        {
             state = GROUNDED;
             cur.status |= LANDING;
         }
@@ -51,7 +61,8 @@ void stateDetect(data_t cur) {
 }
 
 /* The code that runs on core 1 */
-void core1Entry(void) {
+void core1Entry(void)
+{
     data_t d;
     uint8_t status;
     absolute_time_t nextPoll;
@@ -59,7 +70,8 @@ void core1Entry(void) {
     configureSensors();
     status = testSensors();
 
-    while (true) {
+    while(true)
+    {
         mutex_enter_blocking(&flashMtx);
         nextPoll = make_timeout_time_ms(10);
         d = pollSensors(status);
@@ -72,7 +84,8 @@ void core1Entry(void) {
     }
 }
 
-int main() {
+int main()
+{
 
     stdio_init_all();
 
@@ -82,12 +95,13 @@ int main() {
 
     sleep_ms(1000);
 
-    while(true) {
-        if(stdio_usb_connected()) {
+    while(true)
+    {
+        if(stdio_usb_connected())
             pollUsb();
-        } else {
+
+        else
             writeAll();
-        }
     }
 
     /* while (true) { */

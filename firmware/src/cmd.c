@@ -12,20 +12,23 @@
 #define UPDATE_PERIOD 200
 
 /* Clears the terminal */
-static void clearTTY(void) {
+static void clearTTY(void)
+{
     printf("\033c");
 }
 
-static void showCursor(bool visible) {
+static void showCursor(bool visible)
+{
     static char DECTCEM[] = "\033[?25%c";
     char final = visible ? 'h' : 'l';
     printf(DECTCEM, final);
 }
 
-static void debugPrint(void) {
+static void debugPrint(void)
+{
 
     static const char prompt[] =
-        MOV(1,1) NORM
+        MOV(1, 1) NORM
         "Bob Rev 3 running build: %s %s" CLRLN
         "Timestamp: %d" CLRLN
         CLRLN
@@ -47,14 +50,15 @@ static void debugPrint(void) {
     float accel[3];
     float gyro[3];
     float temp;
-    char * goStr[4];
+    char *goStr[4];
 
     int redrawTimer = 0;
 
     clearTTY();
     showCursor(false);
 
-    while (true) {
+    while(true)
+    {
 
         dataHead(&latest);
 
@@ -80,9 +84,9 @@ static void debugPrint(void) {
                latest.mag[0], latest.mag[1], latest.mag[2], goStr[2],
                latest.pres, temp, goStr[3]);
 
-        if (getchar_timeout_us(0) != PICO_ERROR_TIMEOUT) {
+        if(getchar_timeout_us(0) != PICO_ERROR_TIMEOUT)
             break;
-        }
+
         sleep_ms(UPDATE_PERIOD);
 
     }
@@ -91,25 +95,33 @@ static void debugPrint(void) {
     showCursor(true);
 }
 
-static void manualLogger(void) {
+static void manualLogger(void)
+{
     int n = 0;
     printf("Press any key to stop logging. \n");
-    while(getchar_timeout_us(0) == PICO_ERROR_TIMEOUT) {
+
+    while(getchar_timeout_us(0) == PICO_ERROR_TIMEOUT)
+    {
         n = n + writeAll();
         //printf( NORM "Structs written: %d\n", n);
     }
+
     printf("\nExiting Logging!\n");
 }
 
-static void clearPrompt(void) {
+static void clearPrompt(void)
+{
     printf(NORM
            "Are you sure you wish to clear the flash? "
            "["GREEN "Y" WHITE "/" RED "N" WHITE "]\n"
            NORM);
-    switch(getchar_timeout_us(30000000)){
+
+    switch(getchar_timeout_us(30000000))
+    {
     case PICO_ERROR_TIMEOUT:
         printf("Timed out due to lack of response, please try again\n");
         break;
+
     case 'y':
         printf("Clearing flash. (This may take a while) \n");
         clearData();
@@ -120,7 +132,8 @@ static void clearPrompt(void) {
 
 
 /* Polls stdin and interprets what it gets. */
-void pollUsb(void) {
+void pollUsb(void)
+{
     static const char helpText[] =
         "Bob Rev 3 running build: %s %s\n"
         "Press:\n"
@@ -131,28 +144,36 @@ void pollUsb(void) {
         "l to start manual logging\n"
         "r to read files\n";
 
-    switch(getchar_timeout_us(0)) {
+    switch(getchar_timeout_us(0))
+    {
     case PICO_ERROR_TIMEOUT:         // If there is no char, just break.
         break;
+
     case 'b':
         printf("Entering bootsel mode...\n");
-        reset_usb_boot(0,0);
+        reset_usb_boot(0, 0);
         break;
+
     case 'c':
         clearPrompt();
         break;
+
     case 'd':
         debugPrint();
         break;
+
     case 'h':
         printf(helpText, __TIME__, __DATE__);
         break;
+
     case 'l':
         manualLogger();
         break;
+
     case 'r':
         dumpLogs();
         break;
+
     default:
         printf("?\n");
         break;
