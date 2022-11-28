@@ -63,12 +63,14 @@ uint8_t flushData(void) {
 
     printf("Reading from flash\n");
     // Skip past all the written blocks
-    while(cur->contents.metadata != 0xFF) {
+    while(cur->contents.metadata != 0xFF &&
+         (int) cur < PICO_FLASH_SIZE_BYTES + XIP_BASE - 256) {
         writeIndex++;
         cur++;
     }
 
     if((int) cur >= PICO_FLASH_SIZE_BYTES + XIP_BASE - 256) {
+        printf("Out of range, Cur = %X", cur);
         return -1;
     }
 
@@ -128,7 +130,7 @@ void dumpLogs(void) {
     printf("Timestamp, Flags, AX, AY, AZ, GX, GY, GZ, CX, CY, CZ, P, T\n");
 
     while(cur->contents.metadata != 0xFF &&
-         (int)cur >= PICO_FLASH_SIZE_BYTES + XIP_BASE) {
+         (int)cur < PICO_FLASH_SIZE_BYTES + XIP_BASE) {
         for(j = 0; j < cur->contents.metadata; j++) {
             latest = cur->contents.data[j];
 

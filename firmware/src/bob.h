@@ -29,7 +29,7 @@
 #endif
 
 #ifndef PICO_FLASH_SIZE_BYTES
-#define PICO_FLASH_SIZE_BYTES (64 * 1024 * 1024)
+#define PICO_FLASH_SIZE_BYTES (8 * 1024 * 1024)
 #endif
 
 // Buzzer
