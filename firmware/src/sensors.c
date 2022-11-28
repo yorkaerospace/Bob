@@ -1,16 +1,16 @@
 #include "sensors.h"
+#include "hp203b.h"
+#include "qmc5883l.h"
+#include "qmi8658c.h"
+#include "dataBuf.h"
+#include "states.h"
 
-#include "pico/stdlib.h"
-#include "hardware/i2c.h"
+#include <pico/stdlib.h>
+#include <hardware/i2c.h>
 
-#include <hp203b.h>
-#include <qmc5883l.h>
-#include <qmi8658c.h>
 #include <stdint.h>
 #include <string.h>
 #include <math.h>
-#include "dataBuf.h"
-#include "states.h"
 
 // Constants defining constants is... mildly cursed, but its the nicest way
 // I could think of to set these universally
