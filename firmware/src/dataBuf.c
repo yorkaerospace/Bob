@@ -83,13 +83,11 @@ int8_t dataPop(data_t *ptr)
         mutex_exit(&bufMtx);
         return -1;
     }
-    else
-    {
-        *ptr = dataBuf[tail];
-        tail = incIndex(tail);
-        mutex_exit(&bufMtx);
-        return 0;
-    }
+
+    *ptr = dataBuf[tail];
+    tail = incIndex(tail);
+    mutex_exit(&bufMtx);
+    return 0;
 }
 
 /*  Gets the data at the head of the buffer
