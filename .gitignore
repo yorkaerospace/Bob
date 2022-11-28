@@ -46,6 +46,7 @@ fp-info-cache
 
 # Random
 .ccls-cache
+tags
 
 # PlatformIO
 firmware/.pio/*
