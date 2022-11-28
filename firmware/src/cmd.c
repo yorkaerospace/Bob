@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include "pico/stdlib.h"
 #include "pico/bootrom.h"
@@ -43,16 +44,16 @@ static void debugPrint(void)
         "Press any key to exit.\x1b[0J\n";
 
     // I am a sucker for pretty terminal colours. Leave me alone.
-    static const char go[] = BLUE "[" GREEN "  GO" BLUE "  ]" WHITE;
-    static const char nogo[] = BLUE"[" RED " NOGO " BLUE"]" WHITE;
+    static const char status_ok[] = BLUE "[" GREEN "  GO" BLUE "  ]" WHITE;
+    static const char status_bad[] = BLUE"[" RED " NOGO " BLUE"]" WHITE;
 
     data_t latest;
     float accel[3];
     float gyro[3];
     float temp;
-    char *goStr[4];
+    char *status[4];
 
-    int redrawTimer = 0;
+    /* int redrawTimer = 0; */
 
     clearTTY();
     showCursor(false);
@@ -72,23 +73,23 @@ static void debugPrint(void)
 
         temp = (float)latest.temp / 100;
 
-        goStr[0] = latest.status & NO_ACCL == 0 ? nogo : go;
-        goStr[1] = latest.status & NO_GYRO == 0 ? nogo : go;
-        goStr[2] = latest.status & NO_COMP == 0 ? nogo : go;
-        goStr[3] = latest.status & NO_BARO == 0 ? nogo : go;
+        // get status of the sensors
+        status[0] = (latest.status & NO_ACCL == 0) ? status_bad : status_ok;
+        status[1] = (latest.status & NO_GYRO == 0) ? status_bad : status_ok;
+        status[2] = (latest.status & NO_COMP == 0) ? status_bad : status_ok;
+        status[3] = (latest.status & NO_BARO == 0) ? status_bad : status_ok;
 
         printf(prompt, __TIME__, __DATE__,
                latest.time,
-               accel[0], accel[1], accel[2], goStr[0],
-               gyro[0], gyro[1], gyro[2], goStr[1],
-               latest.mag[0], latest.mag[1], latest.mag[2], goStr[2],
-               latest.pres, temp, goStr[3]);
+               accel[0], accel[1], accel[2], status[0],
+               gyro[0], gyro[1], gyro[2], status[1],
+               latest.mag[0], latest.mag[1], latest.mag[2], status[2],
+               latest.pres, temp, status[3]);
 
         if(getchar_timeout_us(0) != PICO_ERROR_TIMEOUT)
             break;
 
         sleep_ms(UPDATE_PERIOD);
-
     }
 
     clearTTY();
