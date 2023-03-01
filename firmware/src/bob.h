@@ -32,6 +32,7 @@
     #define PICO_FLASH_SIZE_BYTES (8 * 1024 * 1024)
 #endif
 
+
 // Buzzer
 #define BOB_BUZZER 7
 
