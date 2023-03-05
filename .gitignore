@@ -50,3 +50,9 @@ tags
 
 # PlatformIO
 firmware/.pio/*
+
+# Build dir
+build
+
+# Data files
+drivers/*.csv
