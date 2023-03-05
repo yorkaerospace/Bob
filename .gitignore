@@ -49,3 +49,6 @@ fp-info-cache
 
 # Build dir
 build
+
+# Data files
+drivers/*.csv
