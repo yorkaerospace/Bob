@@ -46,3 +46,6 @@ fp-info-cache
 
 # Random
 .ccls-cache
+
+# Build dir
+build
