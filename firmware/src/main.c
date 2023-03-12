@@ -36,8 +36,8 @@ int main() {
                 break;
             case 'l':
                 state = DEBUG_LOG;
-                break
-                    }
+                break;
+            }
             break;
         case LOG:
             state = stdio_usb_connected() ? PLUGGED_IN : LOG;
