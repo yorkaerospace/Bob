@@ -141,5 +141,5 @@ uint8_t readSample (size_t index, sample_t * sample) {
 
 void clearFlash(void) {
     flash_range_erase(PROG_RESERVED, 7*1024*1024);
-    writePtr = (sample_t *)(XIP_BASE + PROG_RESERVED);}
+    writePtr = (sample_t *)(XIP_BASE + PROG_RESERVED);
 }

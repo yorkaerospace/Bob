@@ -106,7 +106,7 @@ int main() {
             // If we're out of data, go to PLUGGED_IN
             state = readSample(readIndex, &sample) ? PLUGGED_IN : DATA_OUT;
 
-            printf("%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d\n",
+            printf("%ld, %d, %ld, %ld, %d, %d, %d, %d, %d, %d, %d, %d, %d\n",
                    sample.time, sample.status, sample.pres, sample.temp,
                    sample.mag[0], sample.mag[1], sample.mag[2],
                    sample.accel[0], sample.accel[1], sample.accel[2],

@@ -33,6 +33,6 @@ void logSample(sample_t sample);
 uint8_t readSample (size_t index, sample_t * sample);
 
 /* Clears the flash */
-void clearFlash(void)
+void clearFlash(void);
 
 #endif
