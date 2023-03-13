@@ -2,8 +2,6 @@
 #include "hp203b.h"
 #include "qmc5883l.h"
 #include "qmi8658c.h"
-#include "dataBuf.h"
-#include "states.h"
 
 #include <pico/stdlib.h>
 #include <hardware/i2c.h>
@@ -90,8 +88,8 @@ sample_t getSample(void) {
         sleep_until(hp203Ready);
         i2cStatus = HP203GetData(&hp203, &barometer);
         if(i2cStatus = HP203_OK) {
-            data.pres = barometer.pres;
-            data.temp = barometer.temp;
+            sample.pres = barometer.pres;
+            sample.temp = barometer.temp;
         }
     }
 
