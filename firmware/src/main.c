@@ -10,6 +10,7 @@
 
 enum states {
     PLUGGED_IN,  // Connected to USB
+    DATA_OUT,    // Printing flight data to USB
     DEBUG_PRINT, // Printing debug data to USB
     DEBUG_LOG,   // Logging data while plugged in
     LOG          // Logging data while unplugged
@@ -37,6 +38,9 @@ int main() {
             case 'l':
                 state = DEBUG_LOG;
                 break;
+            case 'r':
+                state = DATA_OUT;
+                break;
             }
             break;
         case LOG:
@@ -53,6 +57,10 @@ int main() {
             state = stdio_usb_connected() ? DEBUG_LOG : LOG;
             // Return to PLUGGED_IN if the user presses a key
             state = getchar_timeout_us(0) == PICO_ERROR_TIMEOUT ? DEBUG_LOG : PLUGGED_IN;
+            break;
+        case DATA_OUT:
+            // If unplugged, go to LOG
+            state = stdio_usb_connected() ? DEBUG_PRINT : LOG;
             break;
         }
     }
