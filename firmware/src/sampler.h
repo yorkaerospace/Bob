@@ -32,4 +32,7 @@ void logSample(sample_t sample);
 /* Reads a sample from flash */
 uint8_t readSample (size_t index, sample_t * sample);
 
+/* Clears the flash */
+void clearFlash(void)
+
 #endif

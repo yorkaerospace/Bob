@@ -16,6 +16,8 @@ static hp203_t hp203;
 static qmc_t qmc;
 static qmi_t qmi;
 
+static sample_t * writePtr = (sample_t *)(XIP_BASE + PROG_RESERVED);
+
 /* Initialises the sensors and the associated i2c bus */
 void configureSensors(void)
 {
@@ -105,7 +107,6 @@ sample_t getSample(void) {
 /* Writes a sample to flash.
  * No longer faffs around with buffering. Just yheets it onto flash. */
 void logSample(sample_t sample) {
-    static sample_t * writePtr = (sample_t *)(XIP_BASE + PROG_RESERVED);
     uint32_t ints;    // Used to store interrupts
     uint8_t buf[512]; // 2 page buffer
 
@@ -136,4 +137,9 @@ uint8_t readSample (size_t index, sample_t * sample) {
         memcpy(sample, ptr, sizeof(sample_t));
         return 0;
     }
+}
+
+void clearFlash(void) {
+    flash_range_erase(PROG_RESERVED, 7*1024*1024);
+    writePtr = (sample_t *)(XIP_BASE + PROG_RESERVED);}
 }
