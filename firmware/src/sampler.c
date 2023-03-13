@@ -5,8 +5,11 @@
 
 #include <pico/stdlib.h>
 #include <hardware/i2c.h>
+#include <hardware/flash.h>
+#include <string.h>
 
 #define PROG_RESERVED (1024 * 1024)
+#define FLASH_SIZE (8 * 1024 * 1024)
 
 // Sensor structs
 static hp203_t hp203;
@@ -87,7 +90,7 @@ sample_t getSample(void) {
     if(hp203Ready == 0) {
         sleep_until(hp203Ready);
         i2cStatus = HP203GetData(&hp203, &barometer);
-        if(i2cStatus = HP203_OK) {
+        if(i2cStatus == HP203_OK) {
             sample.pres = barometer.pres;
             sample.temp = barometer.temp;
         }
@@ -111,7 +114,7 @@ void logSample(sample_t sample) {
     memset(buf, 0xFF, 512);
 
     // Skip past written structs:
-    while (writePtr->status != 0xFF && (int) writePtr < PICO_FLASH_SIZE_BYTES - 512) {
+    while (writePtr->status != 0xFF && (int) writePtr < FLASH_SIZE - 512) {
         writePtr++;
     }
 
@@ -130,7 +133,7 @@ uint8_t readSample (size_t index, sample_t * sample) {
     if(ptr->status == 0xFF) {
         return 1;
     } else {
-        memcpy(sample, ptr, sizeof(sample));
+        memcpy(sample, ptr, sizeof(sample_t));
         return 0;
     }
 }
