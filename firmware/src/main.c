@@ -48,6 +48,29 @@ int main() {
                 readIndex = 0;
                 state = DATA_OUT;
                 break;
+            case 'c':
+                printf(NORM
+                       "Are you sure you wish to clear the flash? "
+                       "["GREEN "Y" WHITE "/" RED "N" WHITE "]\n"
+                       NORM);
+                switch(getchar_timeout_us(30000000)){
+                case PICO_ERROR_TIMEOUT:
+                    printf("Timed out due to lack of response, please try again\n");
+                    break;
+                case 'y':
+                    printf("Clearing flash. (This may take a while) \n");
+                    clearFlash();
+                    printf("Done!\n");
+                    break;
+                }
+                break;
+            case 'b':
+                printf("Entering bootsel mode...\n");
+                reset_usb_boot(0,0);
+                break;
+            default:
+                printf("?\n");
+                break;
             }
             break;
         case LOG:
