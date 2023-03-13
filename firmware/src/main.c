@@ -111,6 +111,8 @@ int main() {
                    sample.mag[0], sample.mag[1], sample.mag[2],
                    sample.accel[0], sample.accel[1], sample.accel[2],
                    sample.gyro[0], sample.gyro[1], sample.gyro[2]);
+
+            readIndex++;
             break;
         }
     }
