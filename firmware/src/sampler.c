@@ -149,7 +149,7 @@ void logSample(sample_t sample) {
     memset(buf, 0xFF, 512);
 
     // Skip past written structs:
-    while (writePtr->status != 0xFF && (int) writePtr < FLASH_SIZE - 512) {
+    while (writePtr->status != 0xFF && (int) writePtr - XIP_BASE < FLASH_SIZE - 512) {
         writePtr++;
     }
 
