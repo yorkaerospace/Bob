@@ -107,7 +107,6 @@ sample_t getSample(void) {
 /* Writes a sample to flash.
  * No longer faffs around with buffering. Just yheets it onto flash. */
 void logSample(sample_t sample) {
-    uint32_t ints;    // Used to store interrupts
     uint8_t buf[512]; // 2 page buffer
 
     // Flash is initialised as all 1s, and then can selectively set to 0
@@ -122,9 +121,10 @@ void logSample(sample_t sample) {
     uint32_t addrInPage = ((int) writePtr) % 256;
     memcpy(buf + addrInPage, &sample, sizeof(sample_t));
 
+    uint32_t ints = save_and_disable_interrupts();
     uint32_t addrInFlash = ((int) writePtr) - XIP_BASE - addrInPage;
     flash_range_program(addrInFlash, buf, 512);
-
+    restore_interrupts(ints);
 }
 
 /* Reads a sample from flash.
