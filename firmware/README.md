@@ -17,5 +17,8 @@ Rewrite of Bob's firmware, using platformIO. The main goal here is to make somet
    - DEBUG_PRINT: Prints live data to console. Looks cool, but I'm a bit iffy on this one.
    - DATA_OUT: Prints recorded data as CSV.
    - PLUGGED_IN: Listens to commands over USB.
+<p align="center">
+  <img src="./doc/StateDiagram.drawio.svg" />
+</p>
  - More states may be added once we actually get some flight data.
  - State machine has been moved into main. This makes main() a bit big but I'm not sure how else to do it.
