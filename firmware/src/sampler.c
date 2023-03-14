@@ -35,19 +35,20 @@ void prettyPrint(sample_t s, char * msg) {
         NORM // Alacritty *really* likes to bold stuff.
         "Barometer:     Pressure: %7ld Pa     Temp: %6ld" "\n"
         NORM
-        "Flash:      Used: %.2f %%"
+        "Flash:         Used: %6ld kiB"
         CLRLN NORM
         "%s.\x1b[0J\n";
 
 
-    float flashUsed = ((float)(int) writePtr / (FLASH_SIZE - PROG_RESERVED)) * 100;
-    float temp = (float)s.temp / 100;
+    uint32_t bytesUsed = (int) writePtr - (XIP_BASE + PROG_RESERVED);
+    uint32_t kiBUsed = bytesUsed >> 10;
+//  float temp = (float)s.temp / 100;
 
     printf(prompt, __TIME__, __DATE__, s.time,
            s.accel[0], s.accel[1], s.accel[2],
            s.gyro[0], s.gyro[1], s.gyro[2],
            s.mag[0], s.mag[1], s.mag[2],
-           s.pres, temp, flashUsed, msg);
+           s.pres, s.temp, kiBUsed, msg);
 
 }
 
