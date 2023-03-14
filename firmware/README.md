@@ -18,4 +18,4 @@ Rewrite of Bob's firmware, using platformIO. The main goal here is to make somet
    - DATA_OUT: Prints recorded data as CSV.
    - PLUGGED_IN: Listens to commands over USB.
  - More states may be added once we actually get some flight data.
- - State machine has been moved into main. This makes main() a bit big but I'm not sure how elite to do it.
+ - State machine has been moved into main. This makes main() a bit big but I'm not sure how else to do it.
