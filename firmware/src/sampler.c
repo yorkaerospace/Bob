@@ -2,6 +2,7 @@
 #include "hp203b.h"
 #include "qmc5883l.h"
 #include "qmi8658c.h"
+#include "ansi.h"
 
 #include <pico/stdlib.h>
 #include <hardware/i2c.h>
@@ -17,6 +18,39 @@ static qmc_t qmc;
 static qmi_t qmi;
 
 static sample_t * writePtr = (sample_t *)(XIP_BASE + PROG_RESERVED);
+
+/* Takes a sample and a message and prints it to the console in
+ * a nice pretty format */
+void prettyPrint(sample_t s, char * msg) {
+    static const char prompt[] =
+        MOV(1,1) NORM
+        "Bob Rev 3 running build: %s %s" CLRLN
+        "Timestamp: %ld" CLRLN
+        CLRLN
+        "Accelerometer: X: %6d     Y: %6d     Z: %6d" "\n"
+        NORM
+        "Gyroscope:     X: %6d     Y: %6d     Z: %6d" "\n"
+        NORM
+        "Compass:       X: %6d     Y: %6d     Z: %6d" "\n"
+        NORM // Alacritty *really* likes to bold stuff.
+        "Barometer:     Pressure: %7ld Pa     Temp: %6ld" "\n"
+        NORM
+        "Flash:      Used: %.2f %%"
+        CLRLN NORM
+        "%s.\x1b[0J\n";
+
+
+    float flashUsed = ((float)(int) writePtr / (FLASH_SIZE - PROG_RESERVED)) * 100;
+    float temp = (float)s.temp / 100;
+
+    printf(prompt, __TIME__, __DATE__, s.time,
+           s.accel[0], s.accel[1], s.accel[2],
+           s.gyro[0], s.gyro[1], s.gyro[2],
+           s.mag[0], s.mag[1], s.mag[2],
+           s.pres, temp, flashUsed, msg);
+
+}
+
 
 /* Initialises the sensors and the associated i2c bus */
 void configureSensors(void)

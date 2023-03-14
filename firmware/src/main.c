@@ -41,7 +41,6 @@ int main() {
                 state = DEBUG_PRINT;
                 break;
             case 'l':
-                printf("Press any key to quit logging \n");
                 state = DEBUG_LOG;
                 break;
             case 'r':
@@ -87,6 +86,12 @@ int main() {
             state = stdio_usb_connected() ? DEBUG_PRINT : LOG;
             // Return to PLUGGED_IN if the user presses a key
             state = getchar_timeout_us(0) == PICO_ERROR_TIMEOUT ? DEBUG_PRINT : PLUGGED_IN;
+
+            nextPoll = make_timeout_time_ms(100);
+            sample = getSample();
+            prettyPrint(sample, "Press any key to exit");
+            sleep_until(nextPoll);
+
             break;
         case DEBUG_LOG:
             // If unplugged, go to LOG
@@ -94,9 +99,10 @@ int main() {
             // Return to PLUGGED_IN if the user presses a key
             state = getchar_timeout_us(0) == PICO_ERROR_TIMEOUT ? DEBUG_LOG : PLUGGED_IN;
 
-            nextPoll = make_timeout_time_ms(10);
+            nextPoll = make_timeout_time_ms(100);
             sample = getSample();
             logSample(sample);
+            prettyPrint(sample, "Press any key to stop logging");
             sleep_until(nextPoll);
 
             break;

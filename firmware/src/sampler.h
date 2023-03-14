@@ -17,6 +17,10 @@ typedef struct {
     int16_t gyro[3];
 } sample_t;
 
+/* Takes a sample and a message and prints it to the console in
+ * a nice pretty format */
+void prettyPrint(sample_t s, char * msg);
+
 /* Initialises the sensors and the associated i2c bus */
 void configureSensors(void);
 
