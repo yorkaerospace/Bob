@@ -102,6 +102,8 @@ sample_t getSample(void) {
     struct hp203_data barometer;
     struct qmi_data imu;
 
+    sample.time = to_ms_since_boot(get_absolute_time());
+
     // The HP203 is slow, so when we ask it for a sample, it responds with the
     // amount of time it'll take. We'll do other stuff while we wait.
     i2cStatus = HP203Measure(&hp203, HP203_PRES_TEMP, HP203_OSR_256);
