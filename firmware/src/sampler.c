@@ -177,6 +177,8 @@ uint8_t readSample (size_t index, sample_t * sample) {
 }
 
 void clearFlash(void) {
+    uint32_t ints = save_and_disable_interrupts();
     flash_range_erase(PROG_RESERVED, 7*1024*1024);
+    restore_interrupts(ints);
     writePtr = (sample_t *)(XIP_BASE + PROG_RESERVED);
 }
