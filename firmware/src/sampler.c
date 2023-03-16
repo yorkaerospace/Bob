@@ -126,7 +126,7 @@ sample_t getSample(void) {
     i2cStatus = QMCGetMag(&qmc, sample.mag);
 
     // Then check the HP203
-    if(hp203Ready == 0) {
+    if(hp203Ready != 0) {
         sleep_until(hp203Ready);
         i2cStatus = HP203GetData(&hp203, &barometer);
         if(i2cStatus == HP203_OK) {
