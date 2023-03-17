@@ -146,7 +146,7 @@ void cmdInterpreter(void) {
         printf(helpText, __TIME__, __DATE__);
         break;
     default:
-        printf("?\n");
+        printf("Invalid command. Press h for help.\n");
         break;
     }
 }
