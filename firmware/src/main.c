@@ -18,15 +18,14 @@ enum states {
 };
 
 enum states state = PLUGGED_IN;
+uint32_t readIndex = 0;
 
-void cmdInterpeter(void);
+void cmdInterpreter(void);
 
 sample_t sampleAndLog(uint8_t freq);
 
 int main() {
     sample_t sample;
-    uint32_t readIndex = 0;
-    absolute_time_t nextPoll;
 
     stdio_init_all();
     configureSensors();
@@ -97,7 +96,7 @@ sample_t sampleAndLog(uint8_t freq) {
 }
 
 /* Interprets and executes commands being given over STDIN */
-void cmdInterpeter(void) {
+void cmdInterpreter(void) {
     // Interpret commands
     switch(getchar_timeout_us(0)) {
     case PICO_ERROR_TIMEOUT:         // If there is no char, just break.
