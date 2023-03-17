@@ -35,7 +35,7 @@ int main() {
         case PLUGGED_IN:
             // State transition logic
             state = stdio_usb_connected() ? PLUGGED_IN : LOG;
-            cmdInterpreter;
+            cmdInterpreter();
             break;
         case LOG:
             state = stdio_usb_connected() ? PLUGGED_IN : LOG;
@@ -97,6 +97,17 @@ sample_t sampleAndLog(uint8_t freq) {
 
 /* Interprets and executes commands being given over STDIN */
 void cmdInterpreter(void) {
+
+    static const char helpText[] =
+        "Bob Rev 3 running build: %s %s\n"
+        "Press:\n"
+        "b to enter bootsel mode\n"
+        "c to clear the contents of the flash\n"
+        "d to show the debug prompt\n"
+        "h to display this help text\n"
+        "l to start manual logging\n"
+        "r to read files\n";
+
     // Interpret commands
     switch(getchar_timeout_us(0)) {
     case PICO_ERROR_TIMEOUT:         // If there is no char, just break.
@@ -130,6 +141,9 @@ void cmdInterpreter(void) {
     case 'b':
         printf("Entering bootsel mode...\n");
         reset_usb_boot(0,0);
+        break;
+    case 'h':
+        printf(helpText, __TIME__, __DATE__);
         break;
     default:
         printf("?\n");
