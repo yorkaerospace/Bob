@@ -50,8 +50,9 @@ int main() {
             // Return to PLUGGED_IN if the user presses a key
             state = getchar_timeout_us(0) == PICO_ERROR_TIMEOUT ? DEBUG_PRINT : PLUGGED_IN;
 
-            sample = sampleAndLog(10);
+            sample = getSample();
             prettyPrint(sample, "Press any key to exit");
+            sleep_ms(100);
 
             break;
         case DEBUG_LOG:
