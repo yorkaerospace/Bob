@@ -21,6 +21,8 @@ enum states state = PLUGGED_IN;
 
 void cmdInterpeter(void);
 
+sample_t sampleAndLog(uint8_t freq);
+
 int main() {
     sample_t sample;
     uint32_t readIndex = 0;
@@ -39,10 +41,7 @@ int main() {
         case LOG:
             state = stdio_usb_connected() ? PLUGGED_IN : LOG;
 
-            nextPoll = make_timeout_time_ms(10);
-            sample = getSample();
-            logSample(sample);
-            sleep_until(nextPoll);
+            sampleAndLog(100);
 
             break;
         case DEBUG_PRINT:
@@ -51,10 +50,8 @@ int main() {
             // Return to PLUGGED_IN if the user presses a key
             state = getchar_timeout_us(0) == PICO_ERROR_TIMEOUT ? DEBUG_PRINT : PLUGGED_IN;
 
-            nextPoll = make_timeout_time_ms(10);
-            sample = getSample();
+            sample = sampleAndLog(10);
             prettyPrint(sample, "Press any key to exit");
-            sleep_until(nextPoll);
 
             break;
         case DEBUG_LOG:
@@ -63,11 +60,8 @@ int main() {
             // Return to PLUGGED_IN if the user presses a key
             state = getchar_timeout_us(0) == PICO_ERROR_TIMEOUT ? DEBUG_LOG : PLUGGED_IN;
 
-            nextPoll = make_timeout_time_ms(10);
-            sample = getSample();
-            logSample(sample);
+            sample = sampleAndLog(100);
             prettyPrint(sample, "Press any key to stop logging");
-            sleep_until(nextPoll);
 
             break;
         case DATA_OUT:
@@ -88,6 +82,21 @@ int main() {
     }
 }
 
+/* Takes and logs a sample, sleeps to ensure samples are taken at the desired
+ * frequency. Returns the logged sample for processing if needed. */
+sample_t sampleAndLog(uint8_t freq) {
+    sample_t sample;
+    absolute_time_t nextPoll;
+
+    nextPoll = make_timeout_time_ms(1000/freq);
+    sample = getSample();
+    logSample(sample);
+    sleep_until(nextPoll);
+
+    return sample;
+}
+
+/* Interprets and executes commands being given over STDIN */
 void cmdInterpeter(void) {
     // Interpret commands
     switch(getchar_timeout_us(0)) {
