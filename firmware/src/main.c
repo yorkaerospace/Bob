@@ -35,6 +35,7 @@ int main() {
         case PLUGGED_IN:
             // State transition logic
             state = stdio_usb_connected() ? PLUGGED_IN : LOG;
+            printf(SHOWC);
             cmdInterpreter();
             break;
         case LOG:
@@ -113,9 +114,11 @@ void cmdInterpreter(void) {
     case PICO_ERROR_TIMEOUT:         // If there is no char, just break.
         break;
     case 'd':
+        printf(HIDEC);
         state = DEBUG_PRINT;
         break;
     case 'l':
+        printf(HIDEC);
         state = DEBUG_LOG;
         break;
     case 'r':
