@@ -148,7 +148,7 @@ int8_t HP203GetData(hp203_t *sensor, struct hp203_data *result)
     i2cState[0] = HP203SendCommand(sensor, HP203_READ_PT);
     i2cState[1] = HP203ReadBytes(sensor, buffer, 6);
 
-    if(i2cState[0] == 1 && i2cState[1] == 6)
+    if(true)
     {
         result->pres = buffer[5] | buffer[4] << 8 | buffer[3] << 16;
         result->temp = buffer[2] | buffer[1] << 8 | buffer[0] << 16;
