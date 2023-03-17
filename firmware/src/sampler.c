@@ -11,6 +11,9 @@
 
 #define PROG_RESERVED (1024 * 1024)
 
+#define GYRO_RANGE QMI_GYRO_256DPS
+#define ACCL_RANGE QMI_ACC_16G
+
 // Sensor structs
 static hp203_t hp203;
 static qmc_t qmc;
@@ -70,12 +73,12 @@ void configureSensors(void)
     qmi = QMIInit(i2c_default, true);
 
     // Configure the QMI's gyro
-    QMIGyroConfig(&qmi, QMI_GYRO_125HZ, QMI_GYRO_256DPS);
+    QMIGyroConfig(&qmi, QMI_GYRO_125HZ, GYRO_RANGE);
     QMISetOption(&qmi, QMI_GYRO_ENABLE, true);
     QMISetOption(&qmi, QMI_GYRO_SNOOZE, false);
 
     // Configure the QMI's accelerometer
-    QMIAccConfig(&qmi, QMI_ACC_125HZ, QMI_ACC_16G);
+    QMIAccConfig(&qmi, QMI_ACC_125HZ, ACCL_RANGE);
     QMISetOption(&qmi, QMI_ACC_ENABLE, true);
 
     // Configure the QMC
