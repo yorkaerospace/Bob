@@ -107,7 +107,7 @@ sample_t getSample(void) {
     // The HP203 is slow, so when we ask it for a sample, it responds with the
     // amount of time it'll take. We'll do other stuff while we wait.
     i2cStatus = HP203Measure(&hp203, HP203_PRES_TEMP, HP203_OSR_256);
-    if(i2cStatus == HP203_OK) {
+    if(i2cStatus > HP203_OK) {
         hp203Ready = make_timeout_time_us(i2cStatus);
     } else {
         // absolute_time_t is a 64 bit int.
@@ -129,10 +129,8 @@ sample_t getSample(void) {
     if(hp203Ready != 0) {
         sleep_until(hp203Ready);
         i2cStatus = HP203GetData(&hp203, &barometer);
-        if(i2cStatus == HP203_OK) {
-            sample.pres = barometer.pres;
-            sample.temp = barometer.temp;
-        }
+        sample.pres = barometer.pres;
+        sample.temp = barometer.temp;
     }
 
     // Zero this for now. Used to check if where we've written in flash.
