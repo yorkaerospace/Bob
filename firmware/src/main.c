@@ -19,6 +19,8 @@ enum states {
 
 enum states state = PLUGGED_IN;
 
+void cmdInterpeter(void);
+
 int main() {
     sample_t sample;
     uint32_t readIndex = 0;
@@ -32,45 +34,7 @@ int main() {
         case PLUGGED_IN:
             // State transition logic
             state = stdio_usb_connected() ? PLUGGED_IN : LOG;
-
-            // Interpret commands
-            switch(getchar_timeout_us(0)) {
-            case PICO_ERROR_TIMEOUT:         // If there is no char, just break.
-                break;
-            case 'd':
-                state = DEBUG_PRINT;
-                break;
-            case 'l':
-                state = DEBUG_LOG;
-                break;
-            case 'r':
-                readIndex = 0;
-                state = DATA_OUT;
-                break;
-            case 'c':
-                printf(NORM
-                       "Are you sure you wish to clear the flash? "
-                       "["GREEN "Y" WHITE "/" RED "N" WHITE "]\n"
-                       NORM);
-                switch(getchar_timeout_us(30000000)){
-                case PICO_ERROR_TIMEOUT:
-                    printf("Timed out due to lack of response, please try again\n");
-                    break;
-                case 'y':
-                    printf("Clearing flash. (This may take a while) \n");
-                    clearFlash();
-                    printf("Done!\n");
-                    break;
-                }
-                break;
-            case 'b':
-                printf("Entering bootsel mode...\n");
-                reset_usb_boot(0,0);
-                break;
-            default:
-                printf("?\n");
-                break;
-            }
+            cmdInterpreter;
             break;
         case LOG:
             state = stdio_usb_connected() ? PLUGGED_IN : LOG;
@@ -121,5 +85,46 @@ int main() {
             readIndex++;
             break;
         }
+    }
+}
+
+void cmdInterpeter(void) {
+    // Interpret commands
+    switch(getchar_timeout_us(0)) {
+    case PICO_ERROR_TIMEOUT:         // If there is no char, just break.
+        break;
+    case 'd':
+        state = DEBUG_PRINT;
+        break;
+    case 'l':
+        state = DEBUG_LOG;
+        break;
+    case 'r':
+        readIndex = 0;
+        state = DATA_OUT;
+        break;
+    case 'c':
+        printf(NORM
+               "Are you sure you wish to clear the flash? "
+               "["GREEN "Y" WHITE "/" RED "N" WHITE "]\n"
+               NORM);
+        switch(getchar_timeout_us(30000000)){
+        case PICO_ERROR_TIMEOUT:
+            printf("Timed out due to lack of response, please try again\n");
+            break;
+        case 'y':
+            printf("Clearing flash. (This may take a while) \n");
+            clearFlash();
+            printf("Done!\n");
+            break;
+        }
+        break;
+    case 'b':
+        printf("Entering bootsel mode...\n");
+        reset_usb_boot(0,0);
+        break;
+    default:
+        printf("?\n");
+        break;
     }
 }
