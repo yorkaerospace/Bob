@@ -174,3 +174,17 @@ int8_t QMIReadData(qmi_t *qmi, struct qmi_data *data)
 
     return i2cStatus;
 }
+
+/* Takes a raw accelerometer reading and returns a value in G */
+float QMIAccG(int16_t accel, enum QMIAccelScale scl)
+{
+    uint8_t scale = pow(2, scl + 1);
+    return ((float) accel / __INT16_MAX__) * (float) scale;
+}
+
+/* Takes a raw reading from the gyro and returns a value in dps */
+float QMIGyroDPS(int16_t gyro, enum QMIGyroScale scl)
+{
+    uint16_t scale = pow(2, scl + 4);
+    return ((float) gyro / __INT16_MAX__) * (float) scale;
+}

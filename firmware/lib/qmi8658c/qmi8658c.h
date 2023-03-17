@@ -201,5 +201,10 @@ int8_t QMIGyroConfig(qmi_t *qmi, enum QMIGyroODR odr, enum QMIGyroScale scl);
     QMI_ERROR_GENERIC for other errors */
 int8_t QMIReadData(qmi_t *qmi, struct qmi_data *data);
 
+/* Takes a raw reading from the gyro and returns a value in dps */
+float QMIGyroDPS(int16_t gyro, enum QMIGyroScale scl);
+
+/* Takes a raw accelerometer reading and returns a value in G */
+float QMIAccG(int16_t accel, enum QMIAccelScale scl)
 
 #endif
