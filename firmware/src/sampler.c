@@ -10,7 +10,6 @@
 #include <string.h>
 
 #define PROG_RESERVED (1024 * 1024)
-#define FLASH_SIZE (8 * 1024 * 1024)
 
 // Sensor structs
 static hp203_t hp203;
@@ -149,7 +148,7 @@ void logSample(sample_t sample) {
     memset(buf, 0xFF, 512);
 
     // Skip past written structs:
-    while (writePtr->status != 0xFF && (int) writePtr - XIP_BASE < FLASH_SIZE - 512) {
+    while (writePtr->status != 0xFF && (int) writePtr - XIP_BASE < PICO_FLASH_SIZE_BYTES - 512) {
         writePtr++;
     }
 
