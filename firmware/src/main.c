@@ -87,7 +87,7 @@ int main() {
             // Return to PLUGGED_IN if the user presses a key
             state = getchar_timeout_us(0) == PICO_ERROR_TIMEOUT ? DEBUG_PRINT : PLUGGED_IN;
 
-            nextPoll = make_timeout_time_ms(100);
+            nextPoll = make_timeout_time_ms(10);
             sample = getSample();
             prettyPrint(sample, "Press any key to exit");
             sleep_until(nextPoll);
@@ -99,7 +99,7 @@ int main() {
             // Return to PLUGGED_IN if the user presses a key
             state = getchar_timeout_us(0) == PICO_ERROR_TIMEOUT ? DEBUG_LOG : PLUGGED_IN;
 
-            nextPoll = make_timeout_time_ms(100);
+            nextPoll = make_timeout_time_ms(10);
             sample = getSample();
             logSample(sample);
             prettyPrint(sample, "Press any key to stop logging");
