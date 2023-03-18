@@ -27,7 +27,7 @@ void prettyPrint(sample_t s, char * msg) {
     static const char prompt[] =
         MOV(1,1) NORM
         "Bob Rev 3 running build: %s %s" CLRLN
-        "Timestamp: %ld" CLRLN
+        "Timestamp: %u" CLRLN
         CLRLN
         "Accelerometer: X: %6d     Y: %6d     Z: %6d" "\n"
         NORM
@@ -35,9 +35,9 @@ void prettyPrint(sample_t s, char * msg) {
         NORM
         "Compass:       X: %6d     Y: %6d     Z: %6d" "\n"
         NORM // Alacritty *really* likes to bold stuff.
-        "Barometer:     Pressure: %7ld Pa     Temp: %6ld" "\n"
+        "Barometer:     Pressure: %7u Pa     Temp: %6d" "\n"
         NORM
-        "Flash:         Used: %6ld kiB"
+        "Flash:         Used: %6u kiB"
         CLRLN NORM
         "%s.\x1b[0J\n";
 
@@ -97,7 +97,7 @@ void configureSensors(void)
  * No longer attempts to determine if sensors are functional.
  * If they don't respond, they dont respond. */
 sample_t getSample(void) {
-    sample_t sample;
+    sample_t sample = {0};
     int32_t i2cStatus;
     absolute_time_t hp203Ready;
 
