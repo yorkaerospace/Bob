@@ -9,6 +9,10 @@
 #include "ansi.h"
 #include "sampler.h"
 
+#define DIRECTION 26
+#define STEP 27
+#define DELAY 500
+
 enum states {
     PLUGGED_IN,  // Connected to USB
     DATA_OUT,    // Printing flight data to USB
@@ -29,6 +33,10 @@ int main() {
 
     stdio_init_all();
     configureSensors();
+    gpio_init(DIRECTION);
+    gpio_set_dir(DIRECTION, GPIO_OUT);
+    gpio_init(STEP);
+    gpio_set_dir(STEP, GPIO_OUT);
 
     while (true) {
         switch (state) {
@@ -99,7 +107,7 @@ sample_t sampleAndLog(uint8_t freq) {
 
 /* Interprets and executes commands being given over STDIN */
 void cmdInterpreter(void) {
-
+    int i;
     static const char helpText[] =
         "Bob Rev 3 running build: %s %s\n"
         "Press:\n"
@@ -148,6 +156,24 @@ void cmdInterpreter(void) {
         break;
     case 'h':
         printf(helpText, __TIME__, __DATE__);
+        break;
+    case 'i':
+        gpio_put(DIRECTION, 0);
+        sleep_us(DELAY);
+        for(i = 0 ; i < 1000*100; i++) {
+            gpio_put(STEP, 1);
+            sleep_us(DELAY);
+            gpio_put(STEP, 0);
+        }
+        break;
+    case 'k':
+        gpio_put(DIRECTION, 1);
+        sleep_us(DELAY);
+        for(i = 0 ; i < 1000*100; i++) {
+            gpio_put(STEP, 1);
+            sleep_us(DELAY);
+            gpio_put(STEP, 0);
+        }
         break;
     default:
         printf("Invalid command. Press h for help.\n");
