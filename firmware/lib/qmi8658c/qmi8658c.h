@@ -205,6 +205,6 @@ int8_t QMIReadData(qmi_t *qmi, struct qmi_data *data);
 float QMIGyroDPS(int16_t gyro, enum QMIGyroScale scl);
 
 /* Takes a raw accelerometer reading and returns a value in G */
-float QMIAccG(int16_t accel, enum QMIAccelScale scl)
+float QMIAccG(int16_t accel, enum QMIAccelScale scl);
 
 #endif
