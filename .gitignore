@@ -49,8 +49,6 @@ fp-info-cache
 
 # PlatformIO
 firmware/.pio/*
-=======
->>>>>>> main
 
 # Build dir
 build
