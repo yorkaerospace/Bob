@@ -47,6 +47,9 @@ fp-info-cache
 # Random
 .ccls-cache
 
+# PlatformIO
+firmware/.pio/*
+
 # Build dir
 build
 

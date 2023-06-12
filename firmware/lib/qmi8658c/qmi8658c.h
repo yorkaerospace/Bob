@@ -8,10 +8,11 @@
 #include "pico/stdlib.h"
 #include "hardware/i2c.h"
 
-/* A libary for operating the QMI8658C IMU from QST Corporation
- * Does not support Attitude Engine or Magnetometer integration.*/
+/*  A libary for operating the QMI8658C IMU from QST Corporation
+    Does not support Attitude Engine or Magnetometer integration.*/
 
-enum QMIRegister {
+enum QMIRegister
+{
     // WHOAMI?
     QMI_WHO_AM_I = 0x00,       // Should contain 0x05
 
@@ -55,14 +56,16 @@ enum QMIRegister {
 
 #define QMI_SCALE_OFFSET 4
 
-enum QMIAccelScale {
+enum QMIAccelScale
+{
     QMI_ACC_2G  = 0x00,
     QMI_ACC_4G  = 0x01,
     QMI_ACC_8G  = 0x02,
     QMI_ACC_16G = 0x03
 };
 
-enum QMIGyroScale {
+enum QMIGyroScale
+{
     QMI_GYRO_16DPS = 0x00,
     QMI_GYRO_32DPS = 0x01,
     QMI_GYRO_64DPS = 0x02,
@@ -73,7 +76,8 @@ enum QMIGyroScale {
     QMI_GYRO_2048DPS = 0x07
 };
 
-enum QMIAccelODR {
+enum QMIAccelODR
+{
     QMI_ACC_8KHZ = 0x00,
     QMI_ACC_4KHZ = 0x01,
     QMI_ACC_2KHZ = 0x02,
@@ -91,7 +95,8 @@ enum QMIAccelODR {
     QMI_ACC_LP_3HZ = 0x0F
 };
 
-enum QMIGyroODR {
+enum QMIGyroODR
+{
     QMI_GYRO_8KHZ = 0x00,
     QMI_GYRO_4KHZ = 0x01,
     QMI_GYRO_2KHZ = 0x02,
@@ -104,7 +109,8 @@ enum QMIGyroODR {
 };
 
 // Settings for the CTRL7 register
-enum QMIOpt {
+enum QMIOpt
+{
     QMI_ACC_ENABLE  = 1 << 0,
     QMI_GYRO_ENABLE = 1 << 1,
     QMI_GYRO_SNOOZE = 1 << 4,
@@ -113,7 +119,8 @@ enum QMIOpt {
 };
 
 // Status codes
-enum QMIStatus {
+enum QMIStatus
+{
     QMI_NO_GYRO        =  3,
     QMI_NO_ACCEL       =  2,
     QMI_NO_SENSORS     =  1,
@@ -126,71 +133,78 @@ enum QMIStatus {
 #define QMI_ADDR 0x6A       // Can be changed to 0x6B by pulling SA0 high.
 #define QMI_TIMEOUT 1000    // This hasnt been done on Bob, but its worth noting
 
-typedef struct {
-    i2c_inst_t * i2c;
+typedef struct
+{
+    i2c_inst_t *i2c;
     uint8_t addr;
 } qmi_t;
 
 // The QMI really wants you to take big reads. Its kinda weird tbh.
-struct qmi_data {
+struct qmi_data
+{
     uint32_t timestamp;
     int16_t temp;
     int16_t accel[3];
     int16_t gyro[3];
 };
 
-/* Generates a QMI_T struct.
- * SA0 is used to set the address, on Bob this should be set to false. */
-qmi_t QMIInit(i2c_inst_t * i2c, bool SA0);
+/*  Generates a QMI_T struct.
+    SA0 is used to set the address, on Bob this should be set to false. */
+qmi_t QMIInit(i2c_inst_t *i2c, bool SA0);
 
-/* The QMI has a self test system, but THEY HAVENT DOCUMENTED IT YET >:(
- * Checks if the QMI talks and if the config is good. Returns:
+/*  The QMI has a self test system, but THEY HAVENT DOCUMENTED IT YET >:(
+    Checks if the QMI talks and if the config is good. Returns:
 
- * QMI_NO_GYRO if the gyro is disabled
- * QMI_NO_ACCL if the accelerometer is disabled
- * QMI_NO_SENSORS if both sensors are disabled
- * QMI_OK if everything seems good, and both sensors are enabled
- * QMI_ERROR_TIMEOUT if the I2C timesout.
- * QMI_ERROR_BAD_CONF if the sensor configuration is invalid.
- * QMI_ERROR_GENERIC for other errors.
- *
- * N.B. If you're getting QMI_GENERIC errors, check that SA0 is set correctly */
-int8_t QMITest(qmi_t * qmi);
+    QMI_NO_GYRO if the gyro is disabled
+    QMI_NO_ACCL if the accelerometer is disabled
+    QMI_NO_SENSORS if both sensors are disabled
+    QMI_OK if everything seems good, and both sensors are enabled
+    QMI_ERROR_TIMEOUT if the I2C timesout.
+    QMI_ERROR_BAD_CONF if the sensor configuration is invalid.
+    QMI_ERROR_GENERIC for other errors.
 
-/* Turns an option on or off.
- * Currently the following options are supported:
- * QMI_ACC_ENABLE  - Enables/disables accelerometer
- * QMI_GYRO_ENABLE - Enables/disables gyroscope
- * QMI_GYRO_SNOOZE - Puts the gyro into snooze mode?
- * QMI_SYS_HS      - Enables/disables the high speed clock?
- * QMI_SYNC_SMPL   - Enables/disables simple sync.
+    N.B. If you're getting QMI_GENERIC errors, check that SA0 is set correctly */
+int8_t QMITest(qmi_t *qmi);
 
- * Returns:
- * The current value of CTRL7 if successful
- * QMI_ERROR_TIMEOUT if the I2C timesout.
- * QMI_ERROR_GENERIC for other errors. */
-int16_t QMISetOption(qmi_t * qmi, enum QMIOpt option, bool set);
+/*  Turns an option on or off.
+    Currently the following options are supported:
+    QMI_ACC_ENABLE  - Enables/disables accelerometer
+    QMI_GYRO_ENABLE - Enables/disables gyroscope
+    QMI_GYRO_SNOOZE - Puts the gyro into snooze mode?
+    QMI_SYS_HS      - Enables/disables the high speed clock?
+    QMI_SYNC_SMPL   - Enables/disables simple sync.
 
-/* Configures the accelerometer.
- * Returns:
- * The value of CTRL2 if successful.
- * QMI_ERROR_TIMEOUT if the I2C timesout.
- * QMI_ERROR_GENERIC for other errors */
-int8_t QMIAccConfig(qmi_t * qmi, enum QMIAccelODR odr, enum QMIAccelScale scl);
+    Returns:
+    The current value of CTRL7 if successful
+    QMI_ERROR_TIMEOUT if the I2C timesout.
+    QMI_ERROR_GENERIC for other errors. */
+int16_t QMISetOption(qmi_t *qmi, enum QMIOpt option, bool set);
 
-/* Configures the gyroscope.
- * Returns:
- * The value of CTRL3 if successful.
- * QMI_ERROR_TIMEOUT if the I2C timesout.
- * QMI_ERROR_GENERIC for other errors */
-int8_t QMIGyroConfig(qmi_t * qmi, enum QMIGyroODR odr, enum QMIGyroScale scl);
+/*  Configures the accelerometer.
+    Returns:
+    The value of CTRL2 if successful.
+    QMI_ERROR_TIMEOUT if the I2C timesout.
+    QMI_ERROR_GENERIC for other errors */
+int8_t QMIAccConfig(qmi_t *qmi, enum QMIAccelODR odr, enum QMIAccelScale scl);
 
-/* Reads the data off the QMI and writes it to data
- * Returns:
- * QMI_OK if successful.
- * QMI_ERROR_TIMEOUT if the I2C timesout.
- * QMI_ERROR_GENERIC for other errors */
-int8_t QMIReadData(qmi_t * qmi, struct qmi_data * data);
+/*  Configures the gyroscope.
+    Returns:
+    The value of CTRL3 if successful.
+    QMI_ERROR_TIMEOUT if the I2C timesout.
+    QMI_ERROR_GENERIC for other errors */
+int8_t QMIGyroConfig(qmi_t *qmi, enum QMIGyroODR odr, enum QMIGyroScale scl);
 
+/*  Reads the data off the QMI and writes it to data
+    Returns:
+    QMI_OK if successful.
+    QMI_ERROR_TIMEOUT if the I2C timesout.
+    QMI_ERROR_GENERIC for other errors */
+int8_t QMIReadData(qmi_t *qmi, struct qmi_data *data);
+
+/* Takes a raw reading from the gyro and returns a value in dps */
+float QMIGyroDPS(int16_t gyro, enum QMIGyroScale scl);
+
+/* Takes a raw accelerometer reading and returns a value in G */
+float QMIAccG(int16_t accel, enum QMIAccelScale scl);
 
 #endif

@@ -10,8 +10,15 @@
 #define CHA(c) "\x1b[" #c "G"
 // Clears from the cursor to the end of the line. Inserts a newline.
 #define CLRLN "\x1b[0k\n"
+// Clears screen
+#define CLRSC "\x1b[2J"
 // Sets text to be rendered neither bold nor faint
 #define NORM  "\x1b[22m"
+// Shows the cursor
+#define SHOWC "\x1b[25h"
+// Hides the cursor
+#define HIDEC "\x1b[25l"
+
 
 // Colours
 #define WHITE "\x1b[0;1m"

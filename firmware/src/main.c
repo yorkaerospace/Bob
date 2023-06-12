@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include "stdio.h"
 
 #include "pico/stdlib.h"
 #include "hardware/i2c.h"
@@ -6,108 +6,151 @@
 #include "pico/multicore.h"
 #include "pico/bootrom.h"
 
+#include "ansi.h"
+#include "sampler.h"
 
-#include "sensors.h"
-#include "cmd.h"
-#include "dataBuf.h"
-#include "states.h"
+enum states {
+    PLUGGED_IN,  // Connected to USB
+    DATA_OUT,    // Printing flight data to USB
+    DEBUG_PRINT, // Printing debug data to USB
+    DEBUG_LOG,   // Logging data while plugged in
+    LOG          // Logging data while unplugged
+};
 
-volatile uint8_t state = GROUNDED;
-mutex_t flashMtx;
+enum states state = PLUGGED_IN;
+uint32_t readIndex = 0;
 
-// Pressure threshold for a launch
-#define PRES_L -100  // About 10m
-// Acceleration threshold for a launch
-#define ACCL_L (gToAccel(10))
-// Pressure threshold to detect apogee
-#define PRES_A 100  // About 10m
-// Pressure threshold for landing
-#define PRES_G 100
+void cmdInterpreter(void);
 
-/* Takes a data packet and decides if state changes are needed */
-void stateDetect(data_t cur) {
-    int16_t accel_mag;
-    // Figure out if state changes are required.
-    switch (state) {
-    case GROUNDED:
-        if (deltaPres(100) < PRES_L ||
-            magnitude(cur.accel) > ACCL_L) {
-            state = ASCENDING;
-            cur.status |= LAUNCH;
-        }
-        break;
-    case ASCENDING:
-        if (deltaPres(100) > PRES_A) {
-            state = DESENDING;
-            cur.status |= APOGEE;
-        }
-        break;
-    case DESENDING:
-        if (abs(deltaPres(1000)) < PRES_G) {
-            state = GROUNDED;
-            cur.status |= LANDING;
-        }
-    }
-}
-
-/* The code that runs on core 1 */
-void core1Entry(void) {
-    data_t d;
-    uint8_t status;
-    absolute_time_t nextPoll;
-
-    configureSensors();
-    status = testSensors();
-
-    while (true) {
-        mutex_enter_blocking(&flashMtx);
-        nextPoll = make_timeout_time_ms(10);
-        d = pollSensors(status);
-        dataPush(d);
-        //stateDetect(d);
-        status = d.status;
-        mutex_exit(&flashMtx);
-        sleep_until(nextPoll);
-
-    }
-}
+sample_t sampleAndLog(uint8_t freq);
 
 int main() {
+    sample_t sample;
 
     stdio_init_all();
+    configureSensors();
 
-    mutex_init(&flashMtx);
+    while (true) {
+        switch (state) {
+        case PLUGGED_IN:
+            // State transition logic
+            state = stdio_usb_connected() ? PLUGGED_IN : LOG;
+            printf(SHOWC);
+            cmdInterpreter();
+            break;
+        case LOG:
+            state = stdio_usb_connected() ? PLUGGED_IN : LOG;
 
-    multicore_launch_core1(core1Entry);
+            sampleAndLog(100);
 
-    sleep_ms(1000);
+            break;
+        case DEBUG_PRINT:
+            // If unplugged, go to LOG
+            state = stdio_usb_connected() ? DEBUG_PRINT : LOG;
+            // Return to PLUGGED_IN if the user presses a key
+            state = getchar_timeout_us(0) == PICO_ERROR_TIMEOUT ? DEBUG_PRINT : PLUGGED_IN;
 
-    while(true) {
-        if(stdio_usb_connected()) {
-            pollUsb();
-        } else {
-            writeAll();
+            sample = getSample();
+            prettyPrint(sample, "Press any key to exit");
+            sleep_ms(100);
+
+            break;
+        case DEBUG_LOG:
+            // If unplugged, go to LOG
+            state = stdio_usb_connected() ? DEBUG_LOG : LOG;
+            // Return to PLUGGED_IN if the user presses a key
+            state = getchar_timeout_us(0) == PICO_ERROR_TIMEOUT ? DEBUG_LOG : PLUGGED_IN;
+
+            sample = sampleAndLog(100);
+            prettyPrint(sample, "Press any key to stop logging");
+
+            break;
+        case DATA_OUT:
+            // If unplugged, go to LOG
+            state = stdio_usb_connected() ? DEBUG_PRINT : LOG;
+            // If we're out of data, go to PLUGGED_IN
+            state = readSample(readIndex, &sample) ? PLUGGED_IN : DATA_OUT;
+
+            printf("%u, %d, %u, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d\n",
+                   sample.time, sample.status, sample.pres, sample.temp,
+                   sample.mag[0], sample.mag[1], sample.mag[2],
+                   sample.accel[0], sample.accel[1], sample.accel[2],
+                   sample.gyro[0], sample.gyro[1], sample.gyro[2]);
+
+            readIndex++;
+            break;
         }
     }
+}
 
-    /* while (true) { */
-    /*     switch (state) { */
-    /*     case CONNECTED: */
-    /*         if (!stdio_usb_connected()) { */
-    /*             state = GROUNDED; */
-    /*         } else { */
-    /*             pollUsb(); */
-    /*         } */
-    /*         break; */
-    /*     case GROUNDED: */
-    /*         if (stdio_usb_connected()) { */
-    /*             state = CONNECTED; */
-    /*         } */
-    /*         break; */
-    /*     case ASCENDING: */
-    /*         break; */
-    /*     case DESENDING: */
-    /*         break; */
-    /*     } */
-    /* } */
+/* Takes and logs a sample, sleeps to ensure samples are taken at the desired
+ * frequency. Returns the logged sample for processing if needed. */
+sample_t sampleAndLog(uint8_t freq) {
+    sample_t sample;
+    absolute_time_t nextPoll;
+
+    nextPoll = make_timeout_time_ms(1000/freq);
+    sample = getSample();
+    logSample(sample);
+    sleep_until(nextPoll);
+
+    return sample;
+}
+
+/* Interprets and executes commands being given over STDIN */
+void cmdInterpreter(void) {
+
+    static const char helpText[] =
+        "Bob Rev 3 running build: %s %s\n"
+        "Press:\n"
+        "b to enter bootsel mode\n"
+        "c to clear the contents of the flash\n"
+        "d to show the debug prompt\n"
+        "h to display this help text\n"
+        "l to start manual logging\n"
+        "r to read files\n";
+
+    // Interpret commands
+    switch(getchar_timeout_us(0)) {
+    case PICO_ERROR_TIMEOUT:         // If there is no char, just break.
+        break;
+    case 'd':
+        printf(HIDEC);
+        state = DEBUG_PRINT;
+        break;
+    case 'l':
+        printf(HIDEC);
+        state = DEBUG_LOG;
+        break;
+    case 'r':
+        readIndex = 0;
+        state = DATA_OUT;
+        break;
+    case 'c':
+        printf(NORM
+               "Are you sure you wish to clear the flash? "
+               "["GREEN "Y" WHITE "/" RED "N" WHITE "]\n"
+               NORM);
+        switch(getchar_timeout_us(30000000)){
+        case PICO_ERROR_TIMEOUT:
+            printf("Timed out due to lack of response, please try again\n");
+            break;
+        case 'y':
+            printf("Clearing flash. (This may take a while) \n");
+            clearFlash();
+            printf("Done!\n");
+            break;
+        }
+        break;
+    case 'b':
+        printf("Entering bootsel mode...\n");
+        reset_usb_boot(0,0);
+        break;
+    case 'h':
+        printf(helpText, __TIME__, __DATE__);
+        break;
+    default:
+        printf("Invalid command. Press h for help.\n");
+        break;
+    }
 }
