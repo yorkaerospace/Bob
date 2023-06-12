@@ -46,10 +46,11 @@ fp-info-cache
 
 # Random
 .ccls-cache
-tags
 
 # PlatformIO
 firmware/.pio/*
+=======
+>>>>>>> main
 
 # Build dir
 build
