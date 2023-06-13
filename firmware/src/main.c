@@ -9,17 +9,9 @@
 #include "ansi.h"
 #include "sampler.h"
 #include "taskList.h"
+#include "types.h"
 
-enum states {
-    PLUGGED_IN,  // Connected to USB
-    DATA_OUT,    // Printing flight data to USB
-    DEBUG_PRINT, // Printing debug data to USB
-    DEBUG_LOG,   // Logging data while plugged in
-    LOG          // Logging data while unplugged
-};
-
-enum states state = PLUGGED_IN;
-uint32_t readIndex = 0;
+enum states state = BOOT;
 
 taskList_t tl;
 
