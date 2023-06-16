@@ -38,6 +38,12 @@ static repeating_timer_t hpEndTimer;
 extern taskList_t tl;
 extern enum states state;
 
+// Latest data packets from the sensors.
+// Made global for the state estimator task to have access to them.
+baro_t baroData;
+imu_t  imuData;
+comp_t compData;
+
 /* ------------------------- IRQs ------------------------- */
 
 static bool addRepeat(repeating_timer_t *rt) {
@@ -50,15 +56,59 @@ static bool addOnce(repeating_timer_t *rt) {
     return false;
 }
 
+/* ------------------- DATA PROCESSING -------------------- */
+
+/* Filters the barometer data */
+static baro_t baroProcessor(struct hp203_data raw) {
+    static uint32_t dn1, dn2, bn1, bn2;
+    baro_t out = {0};
+
+    // Apply andy's filter
+    out.vVel = (5*raw.pres - 5*bn2 + 4*dn1 - 2*dn2) >> 4;
+    dn1 = out.vVel; dn2 = dn1; bn1 = raw.pres; bn2 = bn1;
+
+    out.pres = raw.pres;
+    out.temp = raw.temp;
+    out.time = NOW_MS;
+
+    return out;
+}
+
+/* Calculates the magnitude of the accelerometer data  */
+static imu_t imuProcessor(struct qmi_data raw) {
+    imu_t out = {0};
+
+    out.time = NOW_MS;
+    memcpy(out.accl, raw.accl, 6);
+    memcpy(out.gyro, raw.gyro, 6);
+
+    out.accl_mag = out.accl[0] * out.accl[0]
+                 + out.accl[1] * out.accl[1]
+                 + out.accl[2] * out.accl[2];
+
+    return out;
+}
+
+/* This... doesnt do much. Eh. */
+static comp_t compProcessor(int16_t * raw) {
+    comp_t out = {0};
+
+    memcpy(out.compass, raw, 6);
+    out.time = NOW_MS;
+
+    return out;
+}
+
 /* ------------------------- TASKS ------------------------ */
 
 /* Gets data from the HP203. */
 static void hpEndTask(void * data) {
     struct hp203_data hpRaw;
-    baro_t baro;
     int32_t i2cStatus;
 
     i2cStatus = HP203GetData(&hp203, &hpRaw);
+    baroData = baroProcessor(hpRaw);
+
 }
 
 /* Tells the HP203 to start a reading, then sets a timer for
@@ -71,6 +121,7 @@ static void hpStartTask(void * data) {
     if(i2cStatus > HP203_OK) {
         add_repeating_timer_us(i2cStatus, addOnce, hpEndTask, &hpEndTimer);
     }
+
 }
 
 /* Gets IMU data */
@@ -79,6 +130,7 @@ static void qmiTask(void * data) {
     int32_t i2cStatus;
 
     i2cStatus = QMIReadData(&qmi, &imu);
+    imuData = imuProcessor(imu);
 }
 
 /* Gets IMU data */
@@ -87,28 +139,8 @@ static void qmcTask(void * data) {
     int32_t i2cStatus;
 
     i2cStatus = QMCGetMag(&qmc, mag);
+    compData = compProcessor(mag);
 }
-
-/* ------------------- DATA PROCESSING -------------------- */
-
-/* Filters the barometer data */
-baro_t baroProcessor(struct hp203_data raw) {
-    static uint32_t dn1, dn2, bn1, bn2;
-
-    baro_t out = {0};
-
-    // Apply andy's filter
-    out.vVel = (5*raw.pres - 5*bn2 + 4*dn1 - 2*dn2);
-    dn1 = out.vVel; dn2 = dn1; bn1 = raw.pres; bn2 = bn1;
-
-    out.pres = raw.pres;
-    out.temp = raw.temp;
-    out.time = NOW_MS;
-
-    return out;
-}
-
-
 
 /* ------------------------ CONFIG ------------------------ */
 

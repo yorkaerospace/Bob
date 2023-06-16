@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 /* Defines types for this project so we arent constantly pulling in whole
- * Header files. Also means everything is in one place. */
+ * modules for no reason. Also avoids circular dependencies */
 
 typedef struct {
     uint64_t time;       // ms from boot
@@ -13,7 +13,6 @@ typedef struct {
     int32_t  temp;       // CentiDegrees
     // Filtered
     int32_t  vVel;       // Arbitrary units
-    uint32_t agl;        // Meters
 } baro_t;
 
 typedef struct {
@@ -27,15 +26,25 @@ typedef struct {
     int16_t  accl[3];    // Arbitrary units
     int16_t  gyro[3];    // Arbitrary units
     // Processed
-    int16_t  accl_mag;   // Arbitrary units
+    int32_t  accl_mag;   // Arbitrary units ^ 2
 } imu_t;
+
+typedef struct {
+    uint8_t marker;  // 0xAA
+    uint8_t size;
+    uint8_t type;
+    uint8_t data[UINT8_MAX];
+} log_t;
+
+// Configuration values written to flash
+typedef struct {
+    uint32_t glPres;     // Pressure at ground level
+    uint32_t mainPres;   // Pressure to deploy main at
+} conf_t;
 
 enum states {
     BOOT,         // Sit here for some time, let the filters filter.
     PLUGGED_IN,   // Connected to USB
-    DATA_OUT,     // Printing flight data to USB
-    DEBUG_PRINT,  // Printing debug data to USB
-    DEBUG_LOG,    // Logging data while plugged in
     GROUNDED,     // On the ground and unplugged
     BOOST,        // Motor is firing. Guard against deployment.
     COAST,        // Motor burnout.
