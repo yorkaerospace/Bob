@@ -2,19 +2,21 @@
 #include "hardware/timer.h"
 #include "hardware/spi.h"
 #include <hardware/sync.h>
-#include "LoRa.h"
+#include "LoRa-RP2040.h"
+
+#include <pico/stdlib.h>
+#include <string.h>
+#include <stdio.h>
+
+extern "C" {
 #include "gps.h"
 #include "types.h"
 #include "taskList.h"
 
-#include <pico/stdlib.h>
-#include <string.h>
-
 // Externs
 extern taskList_t tl;
-
+}
 static repeating_timer_t hatTimer;
-static lora_t lr = {0};
 static GPS gps;
 
 // Again, provide gps data for... stuff to play with.
@@ -33,6 +35,7 @@ static void hatTask(void * data) {
     readGPSData(&gps);
 
     struct Packet p;
+    uint8_t buf[sizeof(Packet)];
 
     // Get the bits we actually want.
     p.gps_tme = gps.SecondsInDay;
@@ -43,9 +46,11 @@ static void hatTask(void * data) {
     printf("t = %u, lat = %d, lon = %d, sats = %u \n",
            gpsData.time, gpsData.lat, gpsData.lon, gpsData.sats);
 
-    lrBeginPacket(&lr, false);
-    lrWrite(&lr, &gpsData, sizeof(gps_t));
-    lrEndPacket(&lr, false);
+    memcpy(buf, &p, sizeof(Packet));
+
+    LoRa.beginPacket();
+    LoRa.write(buf, sizeof(gps_t));
+    LoRa.endPacket();
 }
 
 static bool hatIRQ(repeating_timer_t *rt) {
@@ -53,7 +58,7 @@ static bool hatIRQ(repeating_timer_t *rt) {
     return true;
 }
 
-void hatInit() {
+extern "C" void hatInit() {
     setup_gps();
 
     spi_init(spi0, 1000 * 1000);
@@ -62,12 +67,14 @@ void hatInit() {
     gpio_set_function(3, GPIO_FUNC_SPI);
     gpio_set_function(4, GPIO_FUNC_SPI);
 
-    lr.spi = spi0;
-    lr.ss = 11;
-    lr.reset = 10; // 29
-    lr.frequency = 868000000;
+    LoRa.setSPI(*spi0);
+    LoRa.setPins(11, 10);
 
-    lrInit(&lr);
-
-    add_repeating_timer_ms(1000, hatIRQ, NULL, &hatTimer);
+    if(LoRa.begin(868E6)) {
+        add_repeating_timer_ms(1000, hatIRQ, NULL, &hatTimer);
+    } else {
+        while (true) {
+            printf("well fuk");
+        }
+    }
 }
