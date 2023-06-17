@@ -1,10 +1,12 @@
 #include "qmi8658c.h"
+#include <math.h>
 
 static int8_t QMIWriteByte(qmi_t *qmi, enum QMIRegister reg, uint8_t value)
 {
     uint8_t buf[2] = {reg, value};
     i2c_write_timeout_per_char_us(qmi->i2c, qmi->addr, buf,
                                   2, false, QMI_TIMEOUT);
+    return 0;
 }
 
 static int8_t QMIReadBytes(qmi_t *qmi, enum QMIRegister reg, uint8_t *buffer, size_t len)

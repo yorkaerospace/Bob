@@ -4,6 +4,7 @@
 #include "qmi8658c.h"
 #include "ansi.h"
 #include "taskList.h"
+#include "types.h"
 
 #include <pico/stdlib.h>
 #include <hardware/i2c.h>
@@ -79,7 +80,7 @@ static imu_t imuProcessor(struct qmi_data raw) {
     imu_t out = {0};
 
     out.time = NOW_MS;
-    memcpy(out.accl, raw.accl, 6);
+    memcpy(out.accl, raw.accel, 6);
     memcpy(out.gyro, raw.gyro, 6);
 
     out.accl_mag = out.accl[0] * out.accl[0]
@@ -135,7 +136,7 @@ static void qmiTask(void * data) {
 
 /* Gets IMU data */
 static void qmcTask(void * data) {
-    int16 mag[3];
+    int16_t mag[3];
     int32_t i2cStatus;
 
     i2cStatus = QMCGetMag(&qmc, mag);

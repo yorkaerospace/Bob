@@ -30,8 +30,14 @@ typedef struct {
 } imu_t;
 
 typedef struct {
-    uint8_t marker;  // 0xAA
-    uint8_t size;
+    uint32_t time;       // Time in seconds since midnight.
+    int32_t lon, lat;
+    uint16_t sats;
+} gps_t;
+
+typedef struct {
+    uint8_t marker;      // 0xAA
+    uint8_t size;        // Bytes, not including header
     uint8_t type;
     uint8_t data[UINT8_MAX];
 } log_t;

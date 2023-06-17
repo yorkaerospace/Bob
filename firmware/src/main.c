@@ -6,6 +6,7 @@
 #include "sampler.h"
 #include "taskList.h"
 #include "types.h"
+#include "hat.h"
 
 enum states state = BOOT;
 
@@ -20,6 +21,7 @@ int main() {
     tl = tlInit();
 
     configureSensors();
+    hatInit();
 
     while (true) {
         tlRun(&tl);
