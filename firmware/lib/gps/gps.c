@@ -122,6 +122,51 @@ void processNMEA( unsigned char *Line, GPS *gps, int length){
                 }
             }
 
+        }
+    } else if (Line[0] == '$' && Line[1] == 'G' && Line[2] == 'P' && Line[3] == 'R' && Line[4] == 'M' && Line[5] == 'C'){
+        // using strtok to split the string
+        char *token = strtok(Line, ",");
+        int index = 0;
+        while (token != NULL) {
+            printf("%d: %s \n", index, token);
+            token = strtok(NULL, ",");
+            index++;
+
+            if(index == 1){
+                gps->Time = atoi(token);
+                gps->Hours = gps->Time / 10000;
+                gps->Minutes = (gps->Time - (gps->Hours * 10000)) / 100;
+                gps->Seconds = (gps->Time - (gps->Hours * 10000) - (gps->Minutes * 100));
+                gps->SecondsInDay = (gps->Hours * 3600) + (gps->Minutes * 60) + gps->Seconds;
+                printf("Time: %d:%d:%d \n", gps->Hours, gps->Minutes, gps->Seconds);
+            }
+
+            if(index == 4){
+                int length = strlen(token);
+                //printf("Length: %d \n", length);
+                //printf("Latitude: %s \n", token);
+                int32_t result = str_to_int(token, length);
+                gps->Latitude = result;
+                //printf("Result: %d \n", result);
+            }
+            if(index == 5){
+                if(token[0] == 'S'){
+                    gps->Latitude = -gps->Latitude;
+                }
+            }
+
+            if(index == 6){
+                int length = strlen(token);
+                int32_t result = str_to_int(token, length);
+                gps->Longitude = result;
+            }
+
+            if(index == 7){
+                if(token[0] == 'W'){
+                    gps->Longitude = -gps->Longitude;
+                }
+            }
+
             if(index == 6){
                 //printf("Fix: %s \n", token);
                 gps->FixQuality = atoi(token);
@@ -173,8 +218,6 @@ void processNMEA( unsigned char *Line, GPS *gps, int length){
                     //printf("Checksum: %s \n", token);
                 }
             }
-
-        }
     }
 
 }
@@ -186,35 +229,38 @@ void readGPSData(GPS *gps){
 
     if (uart_is_readable(uart0)) {
         char c = uart_getc(uart0);
-        // printf("%c", c);
+        while (c && uart_is_readable(uart0)) {
+            printf("%c", c);
 
-        if(c == '$'){
+            if(c == '$'){
 
-            index = 0;
-            Line[index] = c;
-            index++;
+                index = 0;
+                Line[index] = c;
+                index++;
 
-        }
-        else if(index > 90){
+            }
+            else if(index > 90){
 
-            index = 0;
-
-        }
-        else if(index > 0 && c != '\r'){
-
-            Line[index] = c;
-            index++;
-
-            if(c == '\n'){
-
-                Line[index] = '\0';
-                //printf("%s", Line);
-                processNMEA(Line , gps, index);
-                //printf("Time: %d \n", gps.Time);
                 index = 0;
 
             }
+            else if(index > 0 && c != '\r'){
 
+                Line[index] = c;
+                index++;
+
+                if(c == '\n'){
+
+                    Line[index] = '\0';
+                    //printf("%s", Line);
+                    processNMEA(Line , gps, index);
+                    //printf("Time: %d \n", gps.Time);
+                    index = 0;
+
+                }
+
+            }
+            c = uart_getc(uart0);
         }
 
     }

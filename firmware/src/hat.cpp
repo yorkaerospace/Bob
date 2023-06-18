@@ -44,7 +44,7 @@ static void hatTask(void * data) {
     p.gps_sat = gps.Satellites;
 
     printf("t = %u, lat = %d, lon = %d, sats = %u \n",
-           gpsData.time, gpsData.lat, gpsData.lon, gpsData.sats);
+           p.gps_tme,p.gps_lat,p.gps_lng, p.gps_sat);
 
     memcpy(buf, &p, sizeof(Packet));
 
@@ -68,10 +68,12 @@ extern "C" void hatInit() {
     gpio_set_function(4, GPIO_FUNC_SPI);
 
     LoRa.setSPI(*spi0);
-    LoRa.setPins(11, 10);
+    LoRa.setPins(28, 29);
 
+    reset_gps();
     if(LoRa.begin(868E6)) {
         add_repeating_timer_ms(1000, hatIRQ, NULL, &hatTimer);
+        LoRa.setTxPower(8);
     } else {
         while (true) {
             printf("well fuk");
