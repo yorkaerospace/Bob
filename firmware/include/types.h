@@ -30,7 +30,8 @@ typedef struct {
 } imu_t;
 
 typedef struct {
-    uint32_t time;       // Time in seconds since midnight.
+    uint64_t time;       // ms from boot
+    uint32_t utc;        // Time in seconds since midnight.
     int32_t lon, lat;
     uint16_t sats;
 } gps_t;

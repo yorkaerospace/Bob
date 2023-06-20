@@ -40,7 +40,8 @@ extern taskList_t tl;
 extern enum states state;
 
 // Latest data packets from the sensors.
-// Made global for the state estimator task to have access to them.
+// Made global for other tasks to have access to them
+// Since context switching isn't a thing, we can just do this!
 baro_t baroData;
 imu_t  imuData;
 comp_t compData;
