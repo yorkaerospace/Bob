@@ -39,12 +39,9 @@ static repeating_timer_t hpEndTimer;
 extern taskList_t tl;
 extern enum states state;
 
-// Latest data packets from the sensors.
-// Made global for other tasks to have access to them
-// Since context switching isn't a thing, we can just do this!
-baro_t baroData;
-imu_t  imuData;
-comp_t compData;
+extern baro_t baroData;
+extern imu_t  imuData;
+extern comp_t compData;
 
 /* ------------------------- IRQs ------------------------- */
 
@@ -184,6 +181,8 @@ void configureSensors(void)
 
     QMCSetCfg(&qmc, qmcCfg);
 
-    add_repeating_timer_ms(100, addRepeat, hpStartTask, &hpStartTimer);
+    add_repeating_timer_ms(100, addRepeat, qmcTask, &qmcTimer);
+    add_repeating_timer_ms(10, addRepeat, qmiTask, &qmiTimer);
+    add_repeating_timer_ms(10, addRepeat, hpStartTask, &hpStartTimer);
 
 }

@@ -63,3 +63,8 @@ uint8_t tlAdd(taskList_t * tl, void (*taskPtr) (void * ), void * dataPtr) {
         return 0;
     }
 }
+
+/* Returns the number of items in a task list */
+uint8_t tlSize(taskList_t * tl) {
+    return (TL_SIZE - tl->head + tl->tail) % TL_SIZE;
+}

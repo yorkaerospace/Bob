@@ -9,6 +9,7 @@
 
 #include "hardware/timer.h"
 #include "hardware/spi.h"
+#include "hardware/flash.h"
 #include <hardware/sync.h>
 #include <pico/stdlib.h>
 #include <string.h>
@@ -38,14 +39,13 @@ extern "C" {
 #define MINMEA_MAX_SENTENCE_LENGTH 80
 
 extern "C" {
-extern taskList_t tl;
-extern baro_t baroData;
+    extern taskList_t tl;
+    extern baro_t baroData;
+    extern gps_t  gpsData;
 }
 
 static char buf[MINMEA_MAX_SENTENCE_LENGTH];
-
-// Again, provide gps data for... stuff to play with.
-gps_t gpsData = {0};
+static uint64_t vid;
 
 /* ------------------------- STRUCTS ----------------------- */
 
@@ -53,17 +53,17 @@ gps_t gpsData = {0};
 struct packet {
     // Packet information
     uint32_t seq_no;
-    uint32_t time_ms;  // ms since boot
-    char     vid;      // Vehicle ID
+    uint32_t time_ms;     // ms since boot
+    uint64_t vid;         // Vehicle ID
 
     // GPS data
-    uint32_t time_utc; // Seconds since midnight
-    int32_t  lat, lng; // Position
-    uint8_t  sat;      // Satellites
+    uint8_t  time_utc[3]; // Seconds since midnight
+    int32_t  lat, lng;    // Position
+    uint8_t  sat;         // Satellites
 
     // Baro data
-    uint32_t pres;     // Pascals
-    int16_t  temp;     // centidegrees
+    uint32_t pres;        // Pascals
+    int16_t  temp;        // centidegrees
 };
 #pragma pack()
 
@@ -74,33 +74,37 @@ static void hatTask(void * data) {
     struct packet p = {0};
     uint32_t time;
 
-    printf("%s", buf);
-
     struct minmea_sentence_gga frame;
-    if (minmea_parse_gga(&frame, buf)\) {
-        printf("Good!\n");
+    if (minmea_parse_gga(&frame, buf)) {
         // Convert time to seconds
         time = frame.time.hours * 3600
              + frame.time.minutes * 60
              + frame.time.seconds;
 
         // Bundle everything into the packet.
-        p.seq_no   = packetsSent;
-        p.time_ms  = to_ms_since_boot(get_absolute_time());
-        p.vid      = 'F';
-        p.time_utc = time;
-        p.lat      = minmea_rescale(&frame.latitude, 1000);
-        p.lng      = minmea_rescale(&frame.longitude, 1000);
-        p.sat      = frame.satellites_tracked;
-        p.pres     = baroData.pres;
-        p.temp     = baroData.temp;
+        p.seq_no       = packetsSent;
+        p.time_ms      = to_ms_since_boot(get_absolute_time());
+        p.time_utc[0]  = frame.time.hours;
+        p.time_utc[1]  = frame.time.minutes;
+        p.time_utc[2]  = frame.time.seconds;
+        p.vid          = vid;
+        p.lat          = minmea_rescale(&frame.latitude, 1000);
+        p.lng          = minmea_rescale(&frame.longitude, 1000);
+        p.sat          = frame.satellites_tracked;
+        p.pres         = baroData.pres;
+        p.temp         = baroData.temp;
 
-        //printf("time = %d, lat = %d, lng = %d, sat = %d, baro = %d, temp = %d\n",
-        //       p.time_utc, p.lat, p.lng, p.sat, p.pres, p.temp);
+        gpsData.time   = p.time_ms;
+        gpsData.lat    = p.lat;
+        gpsData.lon    = p.lng;
+        gpsData.sats   = p.sat;
+        gpsData.utc[0] = frame.time.hours;
+        gpsData.utc[1] = frame.time.minutes;
+        gpsData.utc[2] = frame.time.seconds;
 
         LoRa.beginPacket();
         LoRa.write((const unsigned char * ) &p, sizeof(struct packet));
-        LoRa.endPacket();
+        LoRa.endPacket(true);
 
         packetsSent++;
     }
@@ -129,7 +133,7 @@ static void uartRX() {
             buf[index] = ch;
             index++;
             // End of sentence, add task and disable this IRQ
-            if(ch == '\n') {
+            if(ch == '\n' && strstr(buf, "GGA") != NULL) {
                 tlAdd(&tl, hatTask, NULL);
                 uart_set_irq_enables(uart0, false, false);
             }
@@ -178,6 +182,8 @@ extern "C" void hatInit() {
     // Set the GPS to only output GGA
     uart_write_blocking(uart0, GGA, sizeof(GGA));
 
-
-
+    // Get the flash ID to serve as vehicle ID
+    uint8_t buf[8];
+    flash_get_unique_id(buf);
+    memcpy(&vid, buf, 8);
 }

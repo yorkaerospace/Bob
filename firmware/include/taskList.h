@@ -3,8 +3,8 @@
 
 #include <stdint.h>
 
-#define TL_SIZE 32
-#define TL_MAX_T 32
+#define TL_SIZE   64
+#define TL_MAX_T  64
 
 typedef struct {
     void (*taskPtr) (void * );
@@ -37,5 +37,8 @@ uint8_t tlRun(taskList_t * tl);
  * 1 if no room remains in the task list
  */
 uint8_t tlAdd(taskList_t * tl, void (*taskPtr) (void * ), void * dataPtr);
+
+/* Returns the number of items in a task list */
+uint8_t tlSize(taskList_t * tl);
 
 #endif

@@ -31,8 +31,8 @@ typedef struct {
 
 typedef struct {
     uint64_t time;       // ms from boot
-    uint32_t utc;        // Time in seconds since midnight.
-    int32_t lon, lat;
+    uint8_t  utc[3];     // Hours, minutes seconds
+    int32_t  lon, lat;
     uint16_t sats;
 } gps_t;
 

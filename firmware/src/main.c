@@ -1,27 +1,34 @@
-#include "stdio.h"
-
 #include "pico/stdlib.h"
+#include "stdio.h"
 
 #include "ansi.h"
 #include "sampler.h"
 #include "taskList.h"
 #include "types.h"
 #include "hat.h"
+#include "shell.h"
 
 enum states state = BOOT;
 
-conf_t cfg = {0};
+// Latest data packets from the sensors.
+// Made global for other tasks to have access to them
+// Since context switching isn't a thing, we can just do this!
+baro_t baroData = {0};
+imu_t  imuData = {0};
+comp_t compData = {0};
+gps_t gpsData = {0};
 
+// Task list
 taskList_t tl;
 
 int main() {
     stdio_init_all();
-    sleep_ms(10000);
 
     tl = tlInit();
 
     configureSensors();
     hatInit();
+    shellInit();
 
     while (true) {
         tlRun(&tl);
