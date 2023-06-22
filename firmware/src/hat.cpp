@@ -20,6 +20,7 @@
 
 extern "C" {
 #include "types.h"
+#include "flash.h"
 #include "taskList.h"
 }
 
@@ -42,6 +43,7 @@ extern "C" {
     extern taskList_t tl;
     extern baro_t baroData;
     extern gps_t  gpsData;
+    extern enum states state;
 }
 
 static char buf[MINMEA_MAX_SENTENCE_LENGTH];
@@ -53,8 +55,11 @@ static uint64_t vid;
 struct packet {
     // Packet information
     uint32_t seq_no;
-    uint32_t time_ms;     // ms since boot
     uint64_t vid;         // Vehicle ID
+
+    // Status
+    char     state;       // Current state
+    uint32_t time_ms;     // ms since boot
 
     // GPS data
     uint8_t  time_utc[3]; // Seconds since midnight
@@ -93,6 +98,7 @@ static void hatTask(void * data) {
         p.sat          = frame.satellites_tracked;
         p.pres         = baroData.pres;
         p.temp         = baroData.temp;
+        p.state        = state;
 
         gpsData.time   = p.time_ms;
         gpsData.lat    = p.lat;
@@ -105,6 +111,8 @@ static void hatTask(void * data) {
         LoRa.beginPacket();
         LoRa.write((const unsigned char * ) &p, sizeof(struct packet));
         LoRa.endPacket(true);
+
+        fPush((unsigned char * ) &gpsData, sizeof(gps_t), GPS);
 
         packetsSent++;
     }

@@ -5,6 +5,7 @@
 #include "ansi.h"
 #include "taskList.h"
 #include "types.h"
+#include "flash.h"
 
 #include <pico/stdlib.h>
 #include <hardware/i2c.h>
@@ -81,9 +82,8 @@ static imu_t imuProcessor(struct qmi_data raw) {
     memcpy(out.accl, raw.accel, 6);
     memcpy(out.gyro, raw.gyro, 6);
 
-    out.accl_mag = out.accl[0] * out.accl[0]
-                 + out.accl[1] * out.accl[1]
-                 + out.accl[2] * out.accl[2];
+    // Really scuff manhattan magnitude.
+    out.accl_mag = out.accl[0] + out.accl[1] + out.accl[2];
 
     return out;
 }
@@ -107,7 +107,7 @@ static void hpEndTask(void * data) {
 
     i2cStatus = HP203GetData(&hp203, &hpRaw);
     baroData = baroProcessor(hpRaw);
-
+    fPush(&baroData, sizeof(baro_t), BARO);
 }
 
 /* Tells the HP203 to start a reading, then sets a timer for
@@ -130,6 +130,7 @@ static void qmiTask(void * data) {
 
     i2cStatus = QMIReadData(&qmi, &imu);
     imuData = imuProcessor(imu);
+    fPush(&imuData, sizeof(imu_t), IMU);
 }
 
 /* Gets IMU data */
@@ -139,6 +140,7 @@ static void qmcTask(void * data) {
 
     i2cStatus = QMCGetMag(&qmc, mag);
     compData = compProcessor(mag);
+    fPush(&compData, sizeof(comp_t), COMP);
 }
 
 /* ------------------------ CONFIG ------------------------ */

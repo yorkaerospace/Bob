@@ -13,6 +13,7 @@ enum types {
     IMU  = 'i', // imu_t
     COMP = 'c', // comp_t
     CFG  = 'C', // conf_t
+    GPS  = 'g', // gps_t
     MSG  = 'm'  // ASCII Message <= 255 Chars
 };
 
@@ -25,6 +26,12 @@ void fPush(uint8_t * buf, uint8_t size, enum types type);
 
 /* Writes a log direct to flash, skipping the buffer.  */
 void fWrite(uint8_t * buf, uint8_t size, enum types type);
+
+/* Puts the read pointer back at the start */
+void fRewind(void);
+
+/* Returns total flash used in kiB */
+int fUsed(void);
 
 /* Erases all data in the flash. Returns the expected time in ms. */
 void fErase(void);

@@ -13,6 +13,7 @@
 #include "ansi.h"
 #include "taskList.h"
 #include "types.h"
+#include "flash.h"
 
 // Task list
 extern taskList_t tl;
@@ -31,6 +32,60 @@ static repeating_timer_t shellTimer;
 static bool shellIRQ(repeating_timer_t * rt);
 
 /* ----------------------- TASKS ----------------------- */
+
+static void flashWipe(void) {
+    printf(NORM
+           "Are you sure you wish to clear the flash? "
+           "["GREEN "Y" WHITE "/" RED "N" WHITE "]\n"
+           NORM);
+    switch(getchar_timeout_us(30000000)){
+    case PICO_ERROR_TIMEOUT:
+        printf("Timed out due to lack of response, please try again\n");
+        break;
+    case 'y':
+        printf("Clearing flash. (This may take a while) \n");
+        fErase();
+        printf("Done!\n");
+        break;
+    }
+}
+
+
+/* Dumps n records from flash. Returns the number actually read. */
+static int flashDump(int n) {
+    int i;
+    log_t l;
+    for(i = 0; i < n; i++) {
+        // Attempt to read from flash.
+        if(fRead(&l)) {
+            return 1;
+        }
+        switch (l.type) {
+        case BARO:;
+            baro_t * b = * l.data;
+            printf("BARO, %lu, %u, %d, %d\n", b->time,
+                   b->pres, b->temp, b->vVel);
+            break;
+        case IMU:;
+            imu_t * i = l.data;
+            printf("IMU, %lu, %d, %d, %d, %d, %d, %d\n", i->time,
+                   i->accl[0], i->accl[1], i->accl[2],
+                   i->gyro[0], i->gyro[1], i->gyro[2]);
+            break;
+        case COMP:;
+            comp_t * c = l.data;
+            printf("COMP, %lu, %d, %d, %d\n", c->time,
+                   c->compass[0], c->compass[1], c->compass[2]);
+            break;
+        case GPS:;
+            gps_t * g = l.data;
+            printf("GPS, %lu, %u, %u, %u, %ld, %ld, %u", g->time,
+                   g->utc[0], g->utc[1], g->utc[2], g->lat, g->lon, g->sats);
+            break;
+        }
+    }
+    return 0;
+}
 
 static void ignore(void) {
     printf(MISSILE);
@@ -54,6 +109,8 @@ static void debugPlot(void) {
         NORM
         "Task List:     %d / %d \n"
         NORM
+        "Flash:         %d kiB \n"
+        NORM
         "\n"
         "Press any key to exit. \n"
         CLRLN NORM
@@ -65,7 +122,8 @@ static void debugPlot(void) {
            compData.compass[0], compData.compass[1], compData.compass[2],
            gpsData.lat, gpsData.lon, gpsData.sats,
            baroData.pres, baroData.temp,
-           tlSize(&tl), TL_SIZE);
+           tlSize(&tl), TL_SIZE,
+           fUsed());
 }
 
 
@@ -99,6 +157,7 @@ static void shellTask(void * ptr) {
         reset_usb_boot(0,0);
         break;
     case 'c':
+        flashWipe();
         shellState = 0;
         break;
     case 'd':
@@ -111,6 +170,12 @@ static void shellTask(void * ptr) {
     case 'm':
         ignore();
         shellState = 0;
+        break;
+    case 'r':
+        if(flashDump(10) != 0) {
+            shellState = 0;
+            fRewind();
+        }
         break;
     }
 }

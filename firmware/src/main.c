@@ -6,9 +6,10 @@
 #include "taskList.h"
 #include "types.h"
 #include "hat.h"
+#include "flash.h"
 #include "shell.h"
 
-enum states state = BOOT;
+enum states state = FAULT_HANDLER;
 
 // Latest data packets from the sensors.
 // Made global for other tasks to have access to them
@@ -29,6 +30,7 @@ int main() {
     configureSensors();
     hatInit();
     shellInit();
+    fInit();
 
     while (true) {
         tlRun(&tl);

@@ -26,7 +26,7 @@ typedef struct {
     int16_t  accl[3];     // Arbitrary units
     int16_t  gyro[3];     // Arbitrary units
     // Processed
-    int32_t  accl_mag;    // Arbitrary units ^ 2
+    int32_t  accl_mag;    // Really arbitrary units.
 } imu_t;
 
 typedef struct {
@@ -36,12 +36,14 @@ typedef struct {
     uint16_t sats;
 } gps_t;
 
+#pragma pack(1)
 typedef struct {
     uint8_t marker;       // 0xAA
     uint8_t size;         // Bytes, not including header
     uint8_t type;
     uint8_t data[UINT8_MAX];
 } log_t;
+#pragma pack()
 
 // Configuration values written to flash
 typedef struct {
