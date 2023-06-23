@@ -7,7 +7,7 @@
  * modules for no reason. Also avoids circular dependencies */
 
 typedef struct {
-    uint64_t time;        // ms from boot
+    uint32_t time;        // ms from boot
     // Raw data
     uint32_t pres;        // Pascals
     int32_t  temp;        // CentiDegrees
@@ -16,12 +16,12 @@ typedef struct {
 } baro_t;
 
 typedef struct {
-    uint64_t time;        // ms from boot
+    uint32_t time;        // ms from boot
     int16_t  compass[3];  // Arbitrary units
 } comp_t;
 
 typedef struct {
-    uint64_t time;        // ms from boot
+    uint32_t time;        // ms from boot
     // Raw
     int16_t  accl[3];     // Arbitrary units
     int16_t  gyro[3];     // Arbitrary units
@@ -30,20 +30,23 @@ typedef struct {
 } imu_t;
 
 typedef struct {
-    uint64_t time;        // ms from boot
+    uint32_t time;        // ms from boot
     uint8_t  utc[3];      // Hours, minutes seconds
     int32_t  lon, lat;
     uint16_t sats;
 } gps_t;
 
-#pragma pack(1)
 typedef struct {
     uint8_t marker;       // 0xAA
     uint8_t size;         // Bytes, not including header
     uint8_t type;
-    uint8_t data[UINT8_MAX];
+    union {
+        baro_t baro;
+        comp_t comp;
+        imu_t  imu;
+        gps_t  gps;
+    } data;
 } log_t;
-#pragma pack()
 
 // Configuration values written to flash
 typedef struct {

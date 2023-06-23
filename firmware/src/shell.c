@@ -53,7 +53,7 @@ static void flashWipe(void) {
 
 /* Dumps n records from flash. Returns the number actually read. */
 static int flashDump(int n) {
-    int i;
+    int i, j;
     log_t l;
     for(i = 0; i < n; i++) {
         // Attempt to read from flash.
@@ -62,25 +62,25 @@ static int flashDump(int n) {
         }
         switch (l.type) {
         case BARO:;
-            baro_t * b = * l.data;
-            printf("BARO, %lu, %u, %d, %d\n", b->time,
-                   b->pres, b->temp, b->vVel);
+            baro_t b = l.data.baro;
+            printf("BARO, %u, %u, %d, %d\n", b.time,
+                   b.pres, b.temp, b.vVel);
             break;
         case IMU:;
-            imu_t * i = l.data;
-            printf("IMU, %lu, %d, %d, %d, %d, %d, %d\n", i->time,
-                   i->accl[0], i->accl[1], i->accl[2],
-                   i->gyro[0], i->gyro[1], i->gyro[2]);
+            imu_t i = l.data.imu;
+            printf("IMU, %u, %d, %d, %d, %d, %d, %d\n", i.time,
+                   i.accl[0], i.accl[1], i.accl[2],
+                   i.gyro[0], i.gyro[1], i.gyro[2]);
             break;
         case COMP:;
-            comp_t * c = l.data;
-            printf("COMP, %lu, %d, %d, %d\n", c->time,
-                   c->compass[0], c->compass[1], c->compass[2]);
+            comp_t c = l.data.comp;
+            printf("COMP, %u, %d, %d, %d\n", c.time,
+                   c.compass[0], c.compass[1], c.compass[2]);
             break;
         case GPS:;
-            gps_t * g = l.data;
-            printf("GPS, %lu, %u, %u, %u, %ld, %ld, %u", g->time,
-                   g->utc[0], g->utc[1], g->utc[2], g->lat, g->lon, g->sats);
+            gps_t g = l.data.gps;
+            printf("GPS, %u, %u, %u, %u, %d, %d, %u\n", g.time,
+                   g.utc[0], g.utc[1], g.utc[2], g.lat, g.lon, g.sats);
             break;
         }
     }
@@ -107,6 +107,8 @@ static void debugPlot(void) {
         NORM
         "Barometer:     Pressure:     %7u Pa      Temp: %7d" "\n"
         NORM
+        "Filter:        %7d \n "
+        NORM
         "Task List:     %d / %d \n"
         NORM
         "Flash:         %d kiB \n"
@@ -121,7 +123,7 @@ static void debugPlot(void) {
            imuData.gyro[0], imuData.gyro[1], imuData.gyro[2],
            compData.compass[0], compData.compass[1], compData.compass[2],
            gpsData.lat, gpsData.lon, gpsData.sats,
-           baroData.pres, baroData.temp,
+           baroData.pres, baroData.temp, baroData.vVel,
            tlSize(&tl), TL_SIZE,
            fUsed());
 }
@@ -172,7 +174,7 @@ static void shellTask(void * ptr) {
         shellState = 0;
         break;
     case 'r':
-        if(flashDump(10) != 0) {
+        if(flashDump(100) != 0) {
             shellState = 0;
             fRewind();
         }

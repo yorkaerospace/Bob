@@ -5,6 +5,7 @@
 #include "taskList.h"
 
 #include <pico/stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 // About 2 seconds worth of data, also about half our RAM.
@@ -18,7 +19,7 @@
 
 // Increment with loop around
 // This would normaly be a modulo, but ARM doesnt have that.
-#define LOOPINC(i, max) i + 1 >= max ? 0 : i + 1;
+#define LOOPINC(i, max) (i + 1) % max;
 
 // Externs
 extern taskList_t tl;
@@ -41,7 +42,7 @@ static repeating_timer_t flashTimer;
 static int fPop(log_t * log) {
     if (head != tail) {
         memcpy(log, &buf[tail], sizeof(log_t));
-        LOOPINC(tail, CIRC_BUF);
+        tail = (tail + 1) % CIRC_BUF;
         return 0;
     } else {
         return 1;
@@ -121,12 +122,13 @@ void fPush(uint8_t * data, uint8_t size, enum types type) {
     l.marker = 0xAA;
     l.size = size;
     l.type = type;
-    memcpy(l.data, data, size);
+    memcpy(&l.data, data, size);
 
     buf[head] = l;
 
     // Increment read pointer
     head = LOOPINC(head, CIRC_BUF);
+
     // Increment write ptr if needed
     if (head == tail) {
         tail = LOOPINC(tail, CIRC_BUF);
@@ -166,5 +168,5 @@ void fInit(void) {
     writeAdr = ((int) readPtr) - XIP_BASE;
     readPtr = (void *) START_PTR;
 
-    add_repeating_timer_ms(500, flashIRQ, NULL, &flashTimer);
+    add_repeating_timer_ms(100, flashIRQ, NULL, &flashTimer);
 }
