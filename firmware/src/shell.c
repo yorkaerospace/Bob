@@ -174,7 +174,7 @@ static void shellTask(void * ptr) {
         shellState = 0;
         break;
     case 'r':
-        if(flashDump(100) != 0) {
+        if(flashDump(100000) != 0) {
             shellState = 0;
             fRewind();
         }
