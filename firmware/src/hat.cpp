@@ -179,17 +179,11 @@ extern "C" void hatInit() {
     LoRa.setPins(28, 29);
 
     if(LoRa.begin(868E6)) {
-        LoRa.setTxPower(9);
+        LoRa.setTxPower(15);
         LoRa.setSpreadingFactor(9);
-        LoRa.setSignalBandwidth(250E3);
-        LoRa.setCodingRate4(8);
-    } else {
-        while(true) {
-            printf("fuc\n");
-        }
+        LoRa.setSignalBandwidth(125E3);
+        LoRa.setSyncWord(0x89);
     }
-
-    printf("initing UART\n");
 
     /* ---- Set up UART & GPS ---- */
     uart_init(uart0, BAUD_RATE);
