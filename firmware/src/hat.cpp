@@ -42,6 +42,7 @@ extern "C" {
 extern "C" {
     extern taskList_t tl;
     extern baro_t baroData;
+    extern imu_t  imuData;
     extern gps_t  gpsData;
     extern enum states state;
 }
@@ -64,13 +65,17 @@ struct packet {
     uint32_t time_ms;     // ms since boot
 
     // GPS data
-    uint8_t  time_utc[3]; // Seconds since midnight
+    uint8_t  time_utc[3]; // hrs, mins, sec
     int32_t  lat, lng;    // Position
     uint8_t  sat;         // Satellites
 
     // Baro data
     uint32_t pres;        // Pascals
     int16_t  temp;        // centidegrees
+
+    // IMU data
+    int16_t  accl[3];     // Arbitrary units
+    int16_t  gyro[3];     // Arbitrary units
 };
 #pragma pack()
 
@@ -102,6 +107,9 @@ static void hatTask(void * data) {
     p.pres         = baroData.pres;
     p.temp         = baroData.temp;
     p.state        = state;
+
+    memcpy(p.accl, imuData.accl, sizeof(imuData.accl));
+    memcpy(p.gyro, imuData.gyro, sizeof(imuData.gyro));
 
     gpsData.time   = p.time_ms;
     gpsData.lat    = p.lat;
