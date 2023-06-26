@@ -46,7 +46,9 @@ extern "C" {
     extern enum states state;
 }
 
-static char buf[MINMEA_MAX_SENTENCE_LENGTH];
+static repeating_timer_t hatTimer;
+static char uartBuf[MINMEA_MAX_SENTENCE_LENGTH];
+static char frameBuf[MINMEA_MAX_SENTENCE_LENGTH];
 static uint64_t vid;
 
 /* ------------------------- STRUCTS ----------------------- */
@@ -55,7 +57,7 @@ static uint64_t vid;
 struct packet {
     // Packet information
     uint32_t seq_no;
-    uint64_t vid;         // Vehicle ID
+    uint8_t vid;         // Vehicle ID
 
     // Status
     char     state;       // Current state
@@ -80,44 +82,43 @@ static void hatTask(void * data) {
     uint32_t time;
 
     struct minmea_sentence_gga frame;
-    if (minmea_parse_gga(&frame, buf)) {
-        // Convert time to seconds
-        time = frame.time.hours * 3600
-             + frame.time.minutes * 60
-             + frame.time.seconds;
+    minmea_parse_gga(&frame, frameBuf);
 
-        // Bundle everything into the packet.
-        p.seq_no       = packetsSent;
-        p.time_ms      = to_ms_since_boot(get_absolute_time());
-        p.time_utc[0]  = frame.time.hours;
-        p.time_utc[1]  = frame.time.minutes;
-        p.time_utc[2]  = frame.time.seconds;
-        p.vid          = vid;
-        p.lat          = minmea_rescale(&frame.latitude, 1000);
-        p.lng          = minmea_rescale(&frame.longitude, 1000);
-        p.sat          = frame.satellites_tracked;
-        p.pres         = baroData.pres;
-        p.temp         = baroData.temp;
-        p.state        = state;
+    // Convert time to seconds
+    time = frame.time.hours * 3600
+         + frame.time.minutes * 60
+         + frame.time.seconds;
 
-        gpsData.time   = p.time_ms;
-        gpsData.lat    = p.lat;
-        gpsData.lon    = p.lng;
-        gpsData.sats   = p.sat;
-        gpsData.utc[0] = frame.time.hours;
-        gpsData.utc[1] = frame.time.minutes;
-        gpsData.utc[2] = frame.time.seconds;
+    // Bundle everything into the packet.
+    p.seq_no       = packetsSent;
+    p.time_ms      = to_ms_since_boot(get_absolute_time());
+    p.time_utc[0]  = frame.time.hours;
+    p.time_utc[1]  = frame.time.minutes;
+    p.time_utc[2]  = frame.time.seconds;
+    p.vid          = vid;
+    p.lat          = minmea_rescale(&frame.latitude, 1000);
+    p.lng          = minmea_rescale(&frame.longitude, 1000);
+    p.sat          = frame.satellites_tracked;
+    p.pres         = baroData.pres;
+    p.temp         = baroData.temp;
+    p.state        = state;
 
-        LoRa.beginPacket();
-        LoRa.write((const unsigned char * ) &p, sizeof(struct packet));
-        LoRa.endPacket(true);
+    gpsData.time   = p.time_ms;
+    gpsData.lat    = p.lat;
+    gpsData.lon    = p.lng;
+    gpsData.sats   = p.sat;
+    gpsData.utc[0] = frame.time.hours;
+    gpsData.utc[1] = frame.time.minutes;
+    gpsData.utc[2] = frame.time.seconds;
 
-        fPush((unsigned char * ) &gpsData, sizeof(gps_t), GPS);
+    LoRa.beginPacket();
+    LoRa.write((const unsigned char * ) &p, sizeof(struct packet));
+    LoRa.endPacket();
 
-        packetsSent++;
-    }
-    // Reenable the IRQ
-    uart_set_irq_enables(uart0, true, false);
+    fPush((unsigned char * ) &gpsData, sizeof(gps_t), GPS);
+
+    packetsSent++;
+
 }
 
 /* ------------------------- IRQs ------------------------- */
@@ -138,15 +139,19 @@ static void uartRX() {
         }
 
         if (copying && index < MINMEA_MAX_SENTENCE_LENGTH) {
-            buf[index] = ch;
+            uartBuf[index] = ch;
             index++;
             // End of sentence, add task and disable this IRQ
-            if(ch == '\n' && strstr(buf, "GGA") != NULL) {
-                tlAdd(&tl, hatTask, NULL);
-                uart_set_irq_enables(uart0, false, false);
+            if(ch == '\n' && strstr(uartBuf, "GGA") != NULL) {
+                memcpy(frameBuf, uartBuf, sizeof(frameBuf));
             }
         }
     }
+}
+
+static bool hatIRQ(repeating_timer_t *rt) {
+    tlAdd(&tl, hatTask, NULL);
+    return true;
 }
 
 
@@ -167,8 +172,13 @@ extern "C" void hatInit() {
 
     if(LoRa.begin(868E6)) {
         LoRa.setTxPower(9);
-        LoRa.setSpreadingFactor(12);
+        LoRa.setSpreadingFactor(9);
         LoRa.setSignalBandwidth(250E3);
+        LoRa.setCodingRate4(8);
+    } else {
+        while(true) {
+            printf("fuc\n");
+        }
     }
 
     printf("initing UART\n");
@@ -190,8 +200,10 @@ extern "C" void hatInit() {
     // Set the GPS to only output GGA
     uart_write_blocking(uart0, GGA, sizeof(GGA));
 
+    add_repeating_timer_ms(1000, hatIRQ, NULL, &hatTimer);
+
     // Get the flash ID to serve as vehicle ID
     uint8_t buf[8];
     flash_get_unique_id(buf);
-    memcpy(&vid, buf, 8);
+    vid = buf[0];
 }
