@@ -14,6 +14,7 @@
 #include "taskList.h"
 #include "types.h"
 #include "flash.h"
+#include "shell.h"
 
 // Task list
 extern taskList_t tl;
@@ -24,11 +25,29 @@ extern imu_t  imuData;
 extern comp_t compData;
 extern gps_t  gpsData;
 
+// Big strings!
+static const char helpText[] =
+    "Bob Rev 3 running build: %s %s\n"
+    "Press:\n"
+    "b to enter bootsel mode\n"
+    "c to clear the contents of the flash\n"
+    "d to show the debug prompt\n"
+    "h to display this help text\n"
+    "r to read files\n";
+
+static const char outHeader[] =
+    "BARO, time, pres, temp, delta\n"
+    "IMU, time, acc x, acc y, acc z, acc filt, gyro x, gyro y, gyro z\n"
+    "COMP, time, x, y, z\n"
+    "GPS, time, hrs, mins, sec, lat, lng, sats\n";
+
 // Timer
 static repeating_timer_t shellTimer;
 
 /* --------------------- PROTOTYPES -------------------- */
 
+static inline void shellStop(void);
+inline void shellStart(void);
 static bool shellIRQ(repeating_timer_t * rt);
 
 /* ----------------------- TASKS ----------------------- */
@@ -50,15 +69,16 @@ static void flashWipe(void) {
     }
 }
 
-
-/* Dumps n records from flash. Returns the number actually read. */
-static int flashDump(int n) {
+/* Dumps a bunch of records from flash, then yeilds the CPU to allow other
+ * stuff to happen */
+static void dumpTask(void * ptr) {
     int i, j;
     log_t l;
-    for(i = 0; i < n; i++) {
+    for(i = 0; i < 100; i++) {
         // Attempt to read from flash.
         if(fRead(&l)) {
-            return 1;
+            shellInit();
+            break;
         }
         switch (l.type) {
         case BARO:;
@@ -84,14 +104,14 @@ static int flashDump(int n) {
             break;
         }
     }
-    return 0;
+    tlAdd(&tl, dumpTask, NULL);
 }
 
 static void ignore(void) {
     printf(MISSILE);
 }
 
-static void debugPlot(void) {
+static void debugTask(void * ptr) {
     static const char prompt[] =
         MOV(1,1) NORM
         "Bob Rev 3 running build: %s %s" CLRLN
@@ -107,9 +127,7 @@ static void debugPlot(void) {
         NORM
         "Barometer:     Pressure:     %7u Pa      Temp: %7d" "\n"
         NORM
-        "Filter:        %7d \n "
-        NORM
-        "Task List:     %d / %d \n"
+        "Task List:     %d / %d\n"
         NORM
         "Flash:         %d kiB \n"
         NORM
@@ -123,9 +141,15 @@ static void debugPlot(void) {
            imuData.gyro[0], imuData.gyro[1], imuData.gyro[2],
            compData.compass[0], compData.compass[1], compData.compass[2],
            gpsData.lat, gpsData.lon, gpsData.sats,
-           baroData.pres, baroData.temp, baroData.vVel,
+           baroData.pres, baroData.temp,
            tlSize(&tl), TL_SIZE,
            fUsed());
+
+    if(getchar_timeout_us(0) != PICO_ERROR_TIMEOUT) {
+        shellInit();
+    } else {
+        tlAdd(&tl, debugTask, NULL);
+    }
 }
 
 
@@ -134,50 +158,34 @@ static void debugPlot(void) {
  *
  * Didnt work at all. Instead we have this.
  *
- * Effectively works as a state machine. Whatever char comes in sets the state.
- * If a command is finished, it sets the state to 0. */
+ * Polls stdin for any commands, then executes the command. Small commands can
+ * be ran within this task, but for longer ones (dump and debug plot) we spin up
+ * new tasks and stop this one. */
 static void shellTask(void * ptr) {
-    static const char helpText[] =
-        "Bob Rev 3 running build: %s %s\n"
-        "Press:\n"
-        "b to enter bootsel mode\n"
-        "c to clear the contents of the flash\n"
-        "d to show the debug prompt\n"
-        "h to display this help text\n"
-        "r to read files\n";
-
-    static char shellState = 0;
     int in = getchar_timeout_us(0);
-    if (in != PICO_ERROR_TIMEOUT) {
-        shellState = in;
-        printf(CLRSC);
-    }
 
-    switch(shellState) {
+    switch(in) {
     case 'b':
         printf("Entering bootsel mode...\n");
         reset_usb_boot(0,0);
         break;
     case 'c':
         flashWipe();
-        shellState = 0;
         break;
     case 'd':
-        debugPlot();
+        shellStop();
+        tlAdd(&tl, debugTask, NULL);
         break;
     case 'h':
         printf(helpText, __TIME__, __DATE__);
-        shellState = 0;
         break;
     case 'm':
         ignore();
-        shellState = 0;
         break;
     case 'r':
-        if(flashDump(100000) != 0) {
-            shellState = 0;
-            fRewind();
-        }
+        printf(outHeader);
+        shellStop();
+        tlAdd(&tl, dumpTask, NULL);
         break;
     }
 }
@@ -190,8 +198,12 @@ static bool shellIRQ(repeating_timer_t * rt) {
     return true;
 }
 
-/* ------------------------ INIT ----------------------- */
+/* --------------------- START/STOP -------------------- */
 
-void shellInit(void) {
+static inline void shellStop(void) {
+    cancel_repeating_timer(&shellTimer);
+}
+
+inline void shellInit(void) {
     add_repeating_timer_ms(500, shellIRQ, NULL, &shellTimer);
 }

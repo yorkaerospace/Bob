@@ -60,14 +60,17 @@ static bool addOnce(repeating_timer_t *rt) {
 
 /* Filters the barometer data */
 static baro_t baroProcessor(struct hp203_data raw) {
-    static int32_t dn1, dn2, bn1, bn2 = 0;
+    static int32_t dn0, dn1, dn2, bn0, bn1, bn2 = 0;
     baro_t out = {0};
 
-    // Apply andy's filter
-    out.vVel = (5*raw.pres - 5*bn2 + 4*dn1 - 2*dn2) >> 4;
-    dn1 = out.vVel; dn2 = dn1; bn1 = raw.pres; bn2 = bn1;
+    bn0 = raw.pres;
+
+    // Apply andy's filter for k = 4, f = 20,
+    dn0 = (10*bn0 - 10*bn2 + 112*dn1 - 49*dn2) >> 8;
+    dn1 = dn0; dn2 = dn1; bn1 = raw.pres; bn2 = bn1;
 
     out.pres = raw.pres;
+    out.vVel = dn0;
     out.temp = raw.temp;
     out.time = NOW_MS;
 
@@ -185,6 +188,6 @@ void configureSensors(void)
 
     add_repeating_timer_ms(10, addRepeat, qmcTask, &qmcTimer);
     add_repeating_timer_ms(10, addRepeat, qmiTask, &qmiTimer);
-    add_repeating_timer_ms(100, addRepeat, hpStartTask, &hpStartTimer);
+    add_repeating_timer_ms(50, addRepeat, hpStartTask, &hpStartTimer);
 
 }
