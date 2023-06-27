@@ -34,7 +34,7 @@ if not args.clear:
     records = 0
 
     # Iterate until we run out of data
-    with yaspin(Spinners.dots) as sp:
+    with yaspin(Spinners.bouncingBar) as sp:
         while b"\n" in line:
             # Housekeeping
             records = records + 1
