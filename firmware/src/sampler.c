@@ -8,6 +8,7 @@
 #include "flash.h"
 
 #include <pico/stdlib.h>
+#include <stdlib.h>
 #include <hardware/i2c.h>
 #include <hardware/sync.h>
 #include <hardware/timer.h>
@@ -87,7 +88,7 @@ static imu_t imuProcessor(struct qmi_data raw) {
     memcpy(out.gyro, raw.gyro, 6);
 
     // Really scuff manhattan magnitude.
-    int32_t acclMag = out.accl[0] + out.accl[1] + out.accl[2];
+    int32_t acclMag = abs(out.accl[0]) + abs(out.accl[1]) + abs(out.accl[2]);
     out.acclFilt = acclMag + 5 * bn0;
 
     return out;
