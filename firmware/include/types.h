@@ -26,7 +26,7 @@ typedef struct {
     int16_t  accl[3];     // Arbitrary units
     int16_t  gyro[3];     // Arbitrary units
     // Processed
-    int32_t  accl_mag;    // Really arbitrary units.
+    int32_t  acclFilt;    // Really arbitrary units.
 } imu_t;
 
 typedef struct {

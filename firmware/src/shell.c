@@ -74,7 +74,7 @@ static void flashWipe(void) {
 static void dumpTask(void * ptr) {
     int i, j;
     log_t l;
-    for(i = 0; i < 100; i++) {
+    for(i = 0; i < 400000; i++) {
         // Attempt to read from flash.
         if(fRead(&l)) {
             shellInit();
@@ -89,7 +89,7 @@ static void dumpTask(void * ptr) {
         case IMU:;
             imu_t i = l.data.imu;
             printf("IMU, %u, %d, %d, %d, %d, %d, %d\n", i.time,
-                   i.accl[0], i.accl[1], i.accl[2],
+                   i.accl[0], i.accl[1], i.accl[2], i.acclFilt,
                    i.gyro[0], i.gyro[1], i.gyro[2]);
             break;
         case COMP:;
