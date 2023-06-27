@@ -207,5 +207,5 @@ extern "C" void hatInit() {
     // Get the flash ID to serve as vehicle ID
     uint8_t buf[8];
     flash_get_unique_id(buf);
-    vid = buf[0];
+    vid = buf[0] ^ buf[1] ^ buf[2] ^ buf[3] ^ buf[4] ^ buf[5] ^ buf[6] ^ buf[7];
 }
